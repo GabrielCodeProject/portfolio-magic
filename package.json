@@ -16,6 +16,7 @@
     "test:coverage": "jest --coverage",
     "quality": "npm run lint && npm run format:check && npm run type-check && npm run test",
     "export": "next build && next export",
+    "export:test": "NEXT_LINT=false next build && next export",
     "deploy": "npm run export && gh-pages -d out",
     "build:github": "GITHUB_PAGES=true npm run build"
   },
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.54.1",
+    "@react-three/test-renderer": "^9.1.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",

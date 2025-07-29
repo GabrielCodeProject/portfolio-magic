@@ -50,6 +50,7 @@ export const resolveResponsiveValue = <T>(
   currentBreakpoint?: Breakpoint
 ): T => {
   if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    const responsiveValue = value as Partial<Record<Breakpoint, T>>;
     const bp = currentBreakpoint || getCurrentBreakpoint();
     const breakpointOrder: Breakpoint[] = ['sm', 'md', 'lg', 'xl', '2xl'];
     const currentIndex = breakpointOrder.indexOf(bp);
@@ -57,15 +58,15 @@ export const resolveResponsiveValue = <T>(
     // Find the closest defined value at or below current breakpoint
     for (let i = currentIndex; i >= 0; i--) {
       const breakpoint = breakpointOrder[i];
-      if (value[breakpoint] !== undefined) {
-        return value[breakpoint] as T;
+      if (responsiveValue[breakpoint] !== undefined) {
+        return responsiveValue[breakpoint] as T;
       }
     }
     
     // Fallback to the first defined value
     for (const breakpoint of breakpointOrder) {
-      if (value[breakpoint] !== undefined) {
-        return value[breakpoint] as T;
+      if (responsiveValue[breakpoint] !== undefined) {
+        return responsiveValue[breakpoint] as T;
       }
     }
   }

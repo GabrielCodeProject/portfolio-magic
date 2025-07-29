@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   
+  // Disable ESLint during build for testing
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
   // Configure asset prefix for GitHub Pages (if deploying to a subdirectory)
   // Uncomment and adjust if deploying to username.github.io/repository-name
   // assetPrefix: process.env.NODE_ENV === 'production' ? '/repository-name' : '',

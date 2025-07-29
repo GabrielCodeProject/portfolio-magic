@@ -76,3 +76,65 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }))
+
+// Mock WebGL context for 3D component testing
+const mockWebGL = {
+  createTexture: jest.fn(),
+  deleteTexture: jest.fn(),
+  bindTexture: jest.fn(),
+  texImage2D: jest.fn(),
+  texParameteri: jest.fn(),
+  createShader: jest.fn(),
+  shaderSource: jest.fn(),
+  compileShader: jest.fn(),
+  createProgram: jest.fn(),
+  attachShader: jest.fn(),
+  linkProgram: jest.fn(),
+  useProgram: jest.fn(),
+  getAttribLocation: jest.fn(),
+  getUniformLocation: jest.fn(),
+  createBuffer: jest.fn(),
+  bindBuffer: jest.fn(),
+  bufferData: jest.fn(),
+  enableVertexAttribArray: jest.fn(),
+  vertexAttribPointer: jest.fn(),
+  uniform1f: jest.fn(),
+  uniform3fv: jest.fn(),
+  uniformMatrix4fv: jest.fn(),
+  clear: jest.fn(),
+  clearColor: jest.fn(),
+  enable: jest.fn(),
+  depthFunc: jest.fn(),
+  drawArrays: jest.fn(),
+  drawElements: jest.fn(),
+  viewport: jest.fn(),
+  ARRAY_BUFFER: 34962,
+  STATIC_DRAW: 35044,
+  COLOR_BUFFER_BIT: 16384,
+  DEPTH_BUFFER_BIT: 256,
+  DEPTH_TEST: 2929,
+  LEQUAL: 515,
+  TRIANGLES: 4,
+  VERTEX_SHADER: 35633,
+  FRAGMENT_SHADER: 35632,
+  COMPILE_STATUS: 35713,
+  LINK_STATUS: 35714,
+  TEXTURE_2D: 3553,
+  RGBA: 6408,
+  UNSIGNED_BYTE: 5121,
+  TEXTURE_MAG_FILTER: 10240,
+  TEXTURE_MIN_FILTER: 10241,
+  LINEAR: 9729,
+}
+
+// Mock HTMLCanvasElement.getContext
+HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
+  if (contextType === 'webgl' || contextType === 'webgl2') {
+    return mockWebGL
+  }
+  return null
+})
+
+// Mock requestAnimationFrame and cancelAnimationFrame
+global.requestAnimationFrame = jest.fn(cb => setTimeout(cb, 16))
+global.cancelAnimationFrame = jest.fn(id => clearTimeout(id))

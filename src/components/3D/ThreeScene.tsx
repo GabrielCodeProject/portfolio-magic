@@ -1,11 +1,11 @@
 'use client';
 
-import { Canvas, extend } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { Suspense, useEffect, useState } from 'react';
 import * as THREE from 'three';
 
-// Ensure all THREE objects are extended (v9 should do this automatically, but being explicit)
-extend(THREE);
+// Note: THREE objects are automatically extended in R3F v9+
+// extend(THREE) is no longer needed and can cause TypeScript issues
 
 import { LoadingSpinner } from '@/components/ui';
 

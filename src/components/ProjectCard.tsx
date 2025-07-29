@@ -10,12 +10,14 @@ interface ProjectCardProps {
   project: Project;
   index: number;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ 
   project, 
   index,
-  className 
+  className,
+  style 
 }) => {
   const { isSlytherin, isGryffindor } = useSafeTheme();
   const [isHovered, setIsHovered] = useState(false);
@@ -46,7 +48,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       )}
       style={{
         animationDelay: `${index * 200}ms`,
-        animationFillMode: 'both'
+        animationFillMode: 'both',
+        ...style
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

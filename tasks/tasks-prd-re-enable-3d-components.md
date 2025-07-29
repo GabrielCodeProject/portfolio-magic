@@ -2,13 +2,15 @@
 
 ## Relevant Files
 
-- `src/components/3D/ThreeErrorBoundary.tsx` - Error boundary component wrapper for 3D components
+- `src/components/3D/ThreeErrorBoundary.tsx` - Error boundary component wrapper for 3D components with client-side error logging
 - `src/components/3D/ThreeErrorBoundary.test.tsx` - Unit tests for error boundary
 - `src/components/ClientPerformanceGate.tsx` - Client-side performance monitoring component for static sites
 - `src/components/ClientPerformanceGate.test.tsx` - Unit tests for client-side performance gate
-- `src/components/3D/fallbacks/CandlesFallback.tsx` - 2D fallback component for FloatingCandles  
-- `src/components/3D/fallbacks/PortraitsFallback.tsx` - 2D fallback component for MovingPortraits
-- `src/components/3D/fallbacks/SnitchFallback.tsx` - 2D fallback component for GoldenSnitch
+- `src/components/3D/fallbacks/CandlesFallback.tsx` - 2D fallback component for FloatingCandles with CSS animations
+- `src/components/3D/fallbacks/PortraitsFallback.tsx` - 2D fallback component for MovingPortraits with interactive eye tracking
+- `src/components/3D/fallbacks/SnitchFallback.tsx` - 2D fallback component for GoldenSnitch with intelligent flight AI
+- `src/components/3D/fallbacks/index.ts` - Export file for all fallback components
+- `src/components/3D/fallbacks/FallbackWrapper.tsx` - Unified wrapper with automatic theme integration
 - `src/components/3D/fallbacks/fallbacks.test.tsx` - Unit tests for all fallback components
 - `src/hooks/useClientGPUDetection.ts` - Client-side hook for detecting device capabilities (no external deps)
 - `src/hooks/useClientGPUDetection.test.ts` - Unit tests for client-side GPU detection
@@ -16,12 +18,18 @@
 - `src/hooks/useClientPerformanceMonitor.test.ts` - Unit tests for client-side performance monitoring
 - `src/utils/deviceCapabilities.ts` - Utility functions for client-side device detection
 - `src/utils/deviceCapabilities.test.ts` - Unit tests for device capability detection
+- `src/utils/errorLogger.ts` - Enhanced client-side error logging utility with component identification
 - `src/app/page.tsx` - Main page component where 3D components need to be uncommented progressively
 - `src/components/3D/FloatingCandles.test.tsx` - Unit tests for FloatingCandles component
 - `src/components/3D/MovingPortraits.test.tsx` - Unit tests for MovingPortraits component  
 - `src/components/3D/GoldenSnitch.test.tsx` - Unit tests for GoldenSnitch component
 - `next.config.ts` - Update Next.js config for static export and GitHub Pages compatibility
 - `package.json` - Add @react-three/test-renderer for testing (no server-side dependencies)
+- `tests/error-boundary.spec.ts` - Playwright tests for error boundary functionality and fallback UI
+- `tests/fallback-components.spec.ts` - Playwright tests for fallback component rendering and static build compatibility
+- `tests/progressive-enhancement.spec.ts` - Playwright tests for CSS-only animations without JavaScript
+- `tests/test-summary.md` - Comprehensive test results and static build readiness assessment
+- `tests/progressive-enhancement-summary.md` - Progressive enhancement test results and achievements
 
 ### Notes
 
@@ -35,28 +43,28 @@
 ## Tasks
 
 - [ ] 1.0 Set up Client-Side Performance Monitoring Infrastructure
-  - [ ] 1.1 Configure Next.js for static export and GitHub Pages deployment in `next.config.ts`
-  - [ ] 1.2 Create `useClientGPUDetection` hook using WebGL context and canvas fingerprinting (no external deps)
-  - [ ] 1.3 Create `useClientPerformanceMonitor` hook using requestAnimationFrame for FPS tracking
-  - [ ] 1.4 Implement `deviceCapabilities.ts` utility with client-side device detection methods
-  - [ ] 1.5 Implement `ClientPerformanceGate` component that conditionally renders 3D components based on client detection
-  - [ ] 1.6 Add client-side performance thresholds (low-end: disable all, mid-range: candles only, high-end: all components)
-  - [ ] 1.7 Add FPS monitoring with 30 FPS threshold and 5-second sustained check using RAF
-  - [ ] 1.8 Create localStorage-based performance metrics storage for development mode
-  - [ ] 1.9 Test static export compatibility (`npm run build && npm run export`)
+  - [x] 1.1 Configure Next.js for static export and GitHub Pages deployment in `next.config.ts`
+  - [x] 1.2 Create `useClientGPUDetection` hook using WebGL context and canvas fingerprinting (no external deps)
+  - [x] 1.3 Create `useClientPerformanceMonitor` hook using requestAnimationFrame for FPS tracking
+  - [x] 1.4 Implement `deviceCapabilities.ts` utility with client-side device detection methods
+  - [x] 1.5 Implement `ClientPerformanceGate` component that conditionally renders 3D components based on client detection
+  - [x] 1.6 Add client-side performance thresholds (low-end: disable all, mid-range: candles only, high-end: all components)
+  - [x] 1.7 Add FPS monitoring with 30 FPS threshold and 5-second sustained check using RAF
+  - [x] 1.8 Create localStorage-based performance metrics storage for development mode
+  - [x] 1.9 Test static export compatibility (`npm run build && npm run export`)
 
 - [ ] 2.0 Create Error Boundaries and Fallback Components
-  - [ ] 2.1 Create `ThreeErrorBoundary` component with client-side error logging to localStorage
-  - [ ] 2.2 Implement `CandlesFallback` component with CSS-animated flame icons (static-compatible)
-  - [ ] 2.3 Implement `PortraitsFallback` component with static portrait images and CSS hover effects
-  - [ ] 2.4 Implement `SnitchFallback` component with CSS-animated golden orb using transforms
-  - [ ] 2.5 Ensure fallback components maintain visual theme and layout consistency for static export
-  - [ ] 2.6 Add client-side error logging with component identification to console and localStorage
-  - [ ] 2.7 Test error boundary activation and fallback component rendering in static build
-  - [ ] 2.8 Ensure all fallback animations work without JavaScript (progressive enhancement)
+  - [x] 2.1 Create `ThreeErrorBoundary` component with client-side error logging to localStorage
+  - [x] 2.2 Implement `CandlesFallback` component with CSS-animated flame icons (static-compatible)
+  - [x] 2.3 Implement `PortraitsFallback` component with static portrait images and CSS hover effects
+  - [x] 2.4 Implement `SnitchFallback` component with CSS-animated golden orb using transforms
+  - [x] 2.5 Ensure fallback components maintain visual theme and layout consistency for static export
+  - [x] 2.6 Add client-side error logging with component identification to console and localStorage
+  - [x] 2.7 Test error boundary activation and fallback component rendering in static build
+  - [x] 2.8 Ensure all fallback animations work without JavaScript (progressive enhancement)
 
 - [ ] 3.0 Implement Automated Testing Framework (Static-Compatible)
-  - [ ] 3.1 Set up React Three Test Renderer for 3D component testing (install `@react-three/test-renderer`)
+  - [x] 3.1 Set up React Three Test Renderer for 3D component testing (install `@react-three/test-renderer`)
   - [ ] 3.2 Create unit tests for `FloatingCandles` component (mounting, unmounting, interactions)
   - [ ] 3.3 Create unit tests for `MovingPortraits` component (mounting, unmounting, interactions)
   - [ ] 3.4 Create unit tests for `GoldenSnitch` component (mounting, unmounting, interactions)

@@ -22,7 +22,10 @@
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_console_messages",
       "mcp__playwright__browser_press_key",
-      "mcp__playwright__browser_wait_for"
+      "mcp__playwright__browser_wait_for",
+      "Bash(pkill:*)",
+      "mcp__playwright__browser_install",
+      "Bash(npx playwright test:*)"
     ],
     "deny": []
   },
