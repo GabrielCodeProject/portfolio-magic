@@ -84,6 +84,7 @@ export const About: React.FC<AboutProps> = ({ className }) => {
 
   return (
     <section
+      id="about"
       ref={sectionRef}
       className={cn(
         'relative min-h-screen py-20 overflow-hidden',

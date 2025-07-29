@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Philosopher:wght@400;700&family=Uncial+Antiqua&display=swap');
 @import 'tailwindcss';
 
+/* Smooth scrolling for navigation */
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   /* ===== SLYTHERIN THEME (DEFAULT) ===== */
   
@@ -1757,4 +1762,194 @@ body::before {
   .show-on-desktop {
     display: block;
   }
+}
+
+/* ===== MICRO-INTERACTIONS ANIMATIONS ===== */
+
+@keyframes magical-hover-lift {
+  0% { 
+    transform: translateY(0px) scale(1); 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  100% { 
+    transform: translateY(-8px) scale(1.02); 
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@keyframes magical-tilt {
+  0% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg); }
+  100% { transform: perspective(1000px) rotateX(5deg) rotateY(5deg); }
+}
+
+@keyframes magical-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes magical-skill-glow {
+  0% { 
+    box-shadow: 0 0 5px currentColor;
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+    transform: scale(1.05);
+  }
+  100% { 
+    box-shadow: 0 0 5px currentColor;
+    transform: scale(1);
+  }
+}
+
+@keyframes magical-form-focus {
+  0% { 
+    box-shadow: 0 0 0 0 currentColor;
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 0 4px rgba(currentColor, 0.3);
+    transform: scale(1.02);
+  }
+  100% { 
+    box-shadow: 0 0 0 8px rgba(currentColor, 0.1);
+    transform: scale(1);
+  }
+}
+
+@keyframes magical-stagger-in {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+@keyframes magical-button-press {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes magical-card-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) rotateX(15deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-10px) rotateX(-5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) rotateX(0deg);
+  }
+}
+
+/* ===== MICRO-INTERACTION UTILITY CLASSES ===== */
+
+.magical-hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.magical-hover-lift:hover {
+  animation: magical-hover-lift 0.3s ease-out forwards;
+}
+
+.magical-tilt {
+  transition: transform 0.3s ease-out;
+}
+
+.magical-tilt:hover {
+  animation: magical-tilt 0.3s ease-out forwards;
+}
+
+.magical-ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.magical-ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  animation: magical-ripple 0.6s ease-out;
+}
+
+.magical-skill-item:hover {
+  animation: magical-skill-glow 1.5s ease-in-out infinite;
+}
+
+.magical-form-field:focus {
+  animation: magical-form-focus 0.6s ease-out;
+}
+
+.magical-stagger-item {
+  opacity: 0;
+  animation: magical-stagger-in 0.6s ease-out forwards;
+}
+
+.magical-button-press:active {
+  animation: magical-button-press 0.15s ease-out;
+}
+
+.magical-card-entrance {
+  animation: magical-card-entrance 0.8s ease-out forwards;
+}
+
+/* Enhanced button interactions */
+.magical-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.magical-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease-out;
+}
+
+.magical-button:hover::before {
+  left: 100%;
+}
+
+.magical-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced glass effect with hover */
+.glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
 }

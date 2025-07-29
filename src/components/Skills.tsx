@@ -308,9 +308,9 @@ export const Skills: React.FC<SkillsProps> = ({ className }) => {
   const SkillCard = ({ skill, index }: { skill: Skill; index: number }) => (
     <div
       className={cn(
-        'group relative p-6 rounded-lg glass border transition-all duration-500 hover:scale-105',
+        'group relative p-6 rounded-lg glass border transition-all duration-500',
         'border-theme-border-primary hover:border-theme-border-accent',
-        'cursor-pointer transform-gpu',
+        'cursor-pointer transform-gpu magical-skill-item magical-hover-lift',
         isVisible && 'animate-magical-levitate'
       )}
       style={{
@@ -408,6 +408,7 @@ export const Skills: React.FC<SkillsProps> = ({ className }) => {
 
   return (
     <section
+      id="skills"
       ref={sectionRef}
       className={cn(
         'relative py-20 overflow-hidden',

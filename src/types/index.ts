@@ -22,9 +22,14 @@ export interface Skill {
 export interface Service {
   id: string;
   title: string;
+  subtitle: string;
   description: string;
   icon: string;
   features: string[];
+  technologies: string[];
+  category: 'web' | 'frontend' | 'backend' | '3d' | 'design' | 'consulting';
+  ctaText?: string;
+  ctaLink?: string;
 }
 
 export interface ContactForm {

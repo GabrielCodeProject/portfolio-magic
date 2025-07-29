@@ -12,6 +12,7 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const { isSlytherin, isGryffindor, theme } = useSafeTheme();
   const [particles, setParticles] = useState<Array<{left: number, top: number, delay: number, duration: number}>>([]);
+  const [scrollY, setScrollY] = useState(0);
 
   // Generate particles on client side to avoid hydration mismatch
   useEffect(() => {
@@ -22,6 +23,13 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       duration: 8 + Math.random() * 4,
     }));
     setParticles(newParticles);
+  }, []);
+
+  // Handle parallax scrolling
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // House crest SVG components
@@ -101,11 +109,11 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
   );
 
   return (
-    <section className={cn('relative min-h-screen flex items-center justify-center overflow-hidden', className)}>
+    <section id="home" className={cn('relative min-h-screen flex items-center justify-center overflow-hidden', className)}>
       {/* Background magical effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-theme-bg-primary via-theme-bg-secondary to-theme-bg-primary" />
       
-      {/* Floating particles */}
+      {/* Floating particles with parallax */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {particles.map((particle, i) => (
           <div
@@ -118,6 +126,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             style={{
               left: `${particle.left}%`,
               top: `${particle.top}%`,
+              transform: `translateY(${scrollY * 0.5}px)`,
               animationDelay: `${particle.delay}s`,
               animationDuration: `${particle.duration}s`,
             }}
