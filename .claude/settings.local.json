@@ -17,7 +17,12 @@
       "Bash(npx tsc:*)",
       "Bash(grep:*)",
       "Bash(git add:*)",
-      "Bash(timeout 10 npm run dev)"
+      "Bash(timeout 10 npm run dev)",
+      "Bash(timeout 10s npm run dev)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_wait_for"
     ],
     "deny": []
   },

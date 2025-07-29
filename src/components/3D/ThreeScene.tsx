@@ -1,7 +1,11 @@
 'use client';
 
-import { Canvas } from '@react-three/fiber';
+import { Canvas, extend } from '@react-three/fiber';
 import { Suspense, useEffect, useState } from 'react';
+import * as THREE from 'three';
+
+// Ensure all THREE objects are extended (v9 should do this automatically, but being explicit)
+extend(THREE);
 
 import { LoadingSpinner } from '@/components/ui';
 
@@ -178,7 +182,7 @@ export default function ThreeScene({
           // Enable shadow mapping
           if (sceneConfig.enableShadows) {
             gl.shadowMap.enabled = true;
-            gl.shadowMap.type = 2; // PCFSoftShadowMap
+            gl.shadowMap.type = THREE.PCFSoftShadowMap;
           }
 
           // Set background

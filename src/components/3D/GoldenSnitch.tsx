@@ -4,8 +4,14 @@ import { useFrame } from '@react-three/fiber';
 import { useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 
+import { useTheme } from '@/hooks/useTheme';
+import { useLODConfig } from '@/hooks/useDevicePerformance';
+
 // Flight states for different behaviors
 type FlightState = 'searching' | 'darting' | 'hovering' | 'evasive';
+
+// LOD quality levels
+type SnitchQuality = 'high' | 'medium' | 'low';
 
 // Golden Snitch component props
 interface GoldenSnitchProps {
@@ -16,20 +22,52 @@ interface GoldenSnitchProps {
   };
   speed?: number;
   scale?: number;
+  // LOD props - if provided, override automatic detection
+  forceLOD?: SnitchQuality;
+  enableTrailEffects?: boolean;
 }
 
 // Individual Wing Component
 function Wing({ 
   side, 
   flapIntensity, 
-  flapSpeed 
+  flapSpeed,
+  theme,
+  quality = 'medium'
 }: { 
   side: 'left' | 'right';
   flapIntensity: number;
   flapSpeed: number;
+  theme: string;
+  quality?: SnitchQuality;
 }) {
   const wingRef = useRef<THREE.Mesh>(null);
   const sideMultiplier = side === 'left' ? -1 : 1;
+
+  // Theme-based wing colors
+  const wingColor = theme === 'slytherin' ? '#C0A85C' : '#FFE55C';
+  const wingEmissive = theme === 'slytherin' ? '#8B7355' : '#B8860B';
+
+  // LOD-based wing geometry
+  const wingDetails = {
+    high: {
+      width: 0.3,
+      height: 0.4,
+      detailLines: 3,
+    },
+    medium: {
+      width: 0.25,
+      height: 0.35,
+      detailLines: 2,
+    },
+    low: {
+      width: 0.2,
+      height: 0.3,
+      detailLines: 1,
+    },
+  };
+
+  const details = wingDetails[quality];
 
   useFrame((state) => {
     if (!wingRef.current) return;
@@ -52,9 +90,11 @@ function Wing({
       position={[0.15 * sideMultiplier, 0, 0]}
     >
       {/* Wing geometry - delicate wing shape */}
-      <planeGeometry args={[0.3, 0.4]} />
+      <planeGeometry args={[details.width, details.height]} />
       <meshStandardMaterial
-        color="#FFE55C"
+        color={wingColor}
+        emissive={wingEmissive}
+        emissiveIntensity={0.1}
         transparent
         opacity={0.8}
         side={THREE.DoubleSide}
@@ -73,29 +113,70 @@ export default function GoldenSnitch({
     z: [-6, 6]
   },
   speed = 1,
-  scale = 1
+  scale = 1,
+  forceLOD,
+  enableTrailEffects
 }: GoldenSnitchProps) {
+  const { config } = useLODConfig();
+  
+  // Use LOD config if not overridden by props
+  const finalEnableTrailEffects = enableTrailEffects ?? config.goldenSnitch.trailEffects;
+  const quality = forceLOD ?? (config.goldenSnitch.wingDetail as SnitchQuality);
+  const flightComplexity = config.goldenSnitch.flightComplexity;
   const snitchRef = useRef<THREE.Group>(null);
   const [currentTarget, setCurrentTarget] = useState<THREE.Vector3>(new THREE.Vector3(0, 2, 0));
   const [flightState, setFlightState] = useState<FlightState>('searching');
   const [stateTimer, setStateTimer] = useState(0);
-  const [velocity, setVelocity] = useState(new THREE.Vector3());
+  const [velocity] = useState(new THREE.Vector3());
+  const { theme } = useTheme();
 
-  // Flight parameters based on state
+  // Theme-based colors
+  const bodyColor = theme === 'slytherin' ? '#C9A961' : '#FFD700';
+  const bodyEmissive = theme === 'slytherin' ? '#8B7355' : '#B8860B';
+  const lightColor = theme === 'slytherin' ? '#C9A961' : '#FFD700';
+
+  // Flight parameters based on state and LOD
   const flightParams = useMemo(() => {
+    const complexityMultiplier = flightComplexity === 'high' ? 1 : flightComplexity === 'medium' ? 0.7 : 0.4;
+    
     switch (flightState) {
       case 'searching':
-        return { maxSpeed: 1.5 * speed, flapSpeed: 8, flapIntensity: 0.4, agility: 0.02 };
+        return { 
+          maxSpeed: 1.5 * speed * complexityMultiplier, 
+          flapSpeed: 8 * complexityMultiplier, 
+          flapIntensity: 0.4 * complexityMultiplier, 
+          agility: 0.02 * complexityMultiplier 
+        };
       case 'darting':
-        return { maxSpeed: 4 * speed, flapSpeed: 15, flapIntensity: 0.6, agility: 0.08 };
+        return { 
+          maxSpeed: 4 * speed * complexityMultiplier, 
+          flapSpeed: 15 * complexityMultiplier, 
+          flapIntensity: 0.6 * complexityMultiplier, 
+          agility: 0.08 * complexityMultiplier 
+        };
       case 'hovering':
-        return { maxSpeed: 0.2 * speed, flapSpeed: 4, flapIntensity: 0.2, agility: 0.01 };
+        return { 
+          maxSpeed: 0.2 * speed * complexityMultiplier, 
+          flapSpeed: 4 * complexityMultiplier, 
+          flapIntensity: 0.2 * complexityMultiplier, 
+          agility: 0.01 * complexityMultiplier 
+        };
       case 'evasive':
-        return { maxSpeed: 5 * speed, flapSpeed: 20, flapIntensity: 0.8, agility: 0.1 };
+        return { 
+          maxSpeed: 5 * speed * complexityMultiplier, 
+          flapSpeed: 20 * complexityMultiplier, 
+          flapIntensity: 0.8 * complexityMultiplier, 
+          agility: 0.1 * complexityMultiplier 
+        };
       default:
-        return { maxSpeed: 1.5 * speed, flapSpeed: 8, flapIntensity: 0.4, agility: 0.02 };
+        return { 
+          maxSpeed: 1.5 * speed * complexityMultiplier, 
+          flapSpeed: 8 * complexityMultiplier, 
+          flapIntensity: 0.4 * complexityMultiplier, 
+          agility: 0.02 * complexityMultiplier 
+        };
     }
-  }, [flightState, speed]);
+  }, [flightState, speed, flightComplexity]);
 
   // Generate new random target within bounds
   const generateNewTarget = () => {
@@ -107,11 +188,24 @@ export default function GoldenSnitch({
     setCurrentTarget(newTarget);
   };
 
-  // Change flight state based on conditions
+  // Change flight state based on conditions (simplified for lower LOD)
   const updateFlightState = (deltaTime: number) => {
     setStateTimer(prev => prev + deltaTime);
 
-    // State transition logic
+    // Simplified state transitions for low complexity
+    if (flightComplexity === 'low') {
+      if (stateTimer > 5 && flightState === 'searching') {
+        setFlightState('hovering');
+        setStateTimer(0);
+      } else if (stateTimer > 3 && flightState === 'hovering') {
+        setFlightState('searching');
+        setStateTimer(0);
+        generateNewTarget();
+      }
+      return;
+    }
+
+    // Full state transition logic for medium/high complexity
     if (stateTimer > 3 && flightState === 'searching') {
       if (Math.random() < 0.3) {
         setFlightState('darting');
@@ -233,10 +327,10 @@ export default function GoldenSnitch({
       <mesh castShadow receiveShadow>
         <sphereGeometry args={[0.1, 16, 16]} />
         <meshStandardMaterial
-          color="#FFD700"
+          color={bodyColor}
           metalness={0.9}
           roughness={0.1}
-          emissive="#FFD700"
+          emissive={bodyEmissive}
           emissiveIntensity={0.1}
         />
       </mesh>
@@ -245,7 +339,7 @@ export default function GoldenSnitch({
       <mesh position={[0, 0, 0]}>
         <torusGeometry args={[0.1, 0.01, 8, 16]} />
         <meshStandardMaterial
-          color="#FFA500"
+          color={bodyEmissive}
           metalness={0.8}
           roughness={0.2}
         />
@@ -256,47 +350,53 @@ export default function GoldenSnitch({
         <Wing 
           side="left" 
           flapIntensity={flightParams.flapIntensity} 
-          flapSpeed={flightParams.flapSpeed} 
+          flapSpeed={flightParams.flapSpeed}
+          theme={theme}
+          quality={quality}
         />
         <Wing 
           side="right" 
           flapIntensity={flightParams.flapIntensity} 
-          flapSpeed={flightParams.flapSpeed} 
+          flapSpeed={flightParams.flapSpeed}
+          theme={theme}
+          quality={quality}
         />
       </group>
 
       {/* Subtle point light for magical glow */}
       <pointLight
         position={[0, 0, 0]}
-        color="#FFD700"
+        color={lightColor}
         intensity={0.2}
         distance={2}
         decay={2}
       />
 
-      {/* Wing trail particles (subtle magical effect) */}
-      <group>
-        <mesh position={[-0.2, 0, -0.1]}>
-          <sphereGeometry args={[0.01, 4, 4]} />
-          <meshStandardMaterial
-            color="#FFD700"
-            emissive="#FFD700"
-            emissiveIntensity={0.5}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-        <mesh position={[0.2, 0, -0.1]}>
-          <sphereGeometry args={[0.01, 4, 4]} />
-          <meshStandardMaterial
-            color="#FFD700"
-            emissive="#FFD700"
-            emissiveIntensity={0.5}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-      </group>
+      {/* Wing trail particles (subtle magical effect) - only on high quality */}
+      {finalEnableTrailEffects && (
+        <group>
+          <mesh position={[-0.2, 0, -0.1]}>
+            <sphereGeometry args={[0.01, 4, 4]} />
+            <meshStandardMaterial
+              color={bodyColor}
+              emissive={bodyEmissive}
+              emissiveIntensity={0.5}
+              transparent
+              opacity={0.6}
+            />
+          </mesh>
+          <mesh position={[0.2, 0, -0.1]}>
+            <sphereGeometry args={[0.01, 4, 4]} />
+            <meshStandardMaterial
+              color={bodyColor}
+              emissive={bodyEmissive}
+              emissiveIntensity={0.5}
+              transparent
+              opacity={0.6}
+            />
+          </mesh>
+        </group>
+      )}
     </group>
   );
 }

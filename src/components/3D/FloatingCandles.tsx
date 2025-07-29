@@ -5,6 +5,10 @@ import { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 
 import { useTheme } from '@/hooks/useTheme';
+import { useLODConfig } from '@/hooks/useDevicePerformance';
+
+// LOD quality levels
+type CandleQuality = 'high' | 'medium' | 'low';
 
 // Individual candle properties
 interface CandleProps {
@@ -12,6 +16,8 @@ interface CandleProps {
   scale?: number;
   animationOffset?: number;
   lightIntensity?: number;
+  quality?: CandleQuality;
+  enableShadows?: boolean;
 }
 
 // Floating candles component props
@@ -20,6 +26,9 @@ interface FloatingCandlesProps {
   spread?: number;
   candleScale?: number;
   lightIntensity?: number;
+  // LOD props - if provided, override automatic detection
+  forceLOD?: CandleQuality;
+  enableShadows?: boolean;
 }
 
 // Individual Candle Component
@@ -27,7 +36,9 @@ function Candle({
   position, 
   scale = 1, 
   animationOffset = 0, 
-  lightIntensity = 0.5 
+  lightIntensity = 0.5,
+  quality = 'medium',
+  enableShadows = true
 }: CandleProps) {
   const candleRef = useRef<THREE.Group>(null);
   const lightRef = useRef<THREE.PointLight>(null);
@@ -37,6 +48,27 @@ function Candle({
   // Theme-based colors
   const flameColor = theme === 'slytherin' ? '#10B981' : '#F59E0B';
   const lightColor = theme === 'slytherin' ? '#059669' : '#D97706';
+
+  // LOD-based geometry complexity
+  const geometryDetails = {
+    high: {
+      candleSegments: 12,
+      flameSegments: 8,
+      shadowMapSize: 1024,
+    },
+    medium: {
+      candleSegments: 8,
+      flameSegments: 6,
+      shadowMapSize: 512,
+    },
+    low: {
+      candleSegments: 6,
+      flameSegments: 4,
+      shadowMapSize: 256,
+    },
+  };
+
+  const details = geometryDetails[quality];
 
   // Animation
   useFrame((state) => {
@@ -63,8 +95,8 @@ function Candle({
   return (
     <group ref={candleRef} position={position}>
       {/* Candle Body */}
-      <mesh castShadow receiveShadow position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.08 * scale, 0.1 * scale, 1.2 * scale, 8]} />
+      <mesh castShadow={enableShadows} receiveShadow={enableShadows} position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.08 * scale, 0.1 * scale, 1.2 * scale, details.candleSegments]} />
         <meshStandardMaterial 
           color="#F5F5DC"
           roughness={0.8}
@@ -72,15 +104,17 @@ function Candle({
         />
       </mesh>
 
-      {/* Candle Wax Drips */}
-      <mesh castShadow position={[0.05 * scale, -0.3 * scale, 0]}>
-        <sphereGeometry args={[0.03 * scale, 6, 4]} />
+      {/* Candle Wax Drips - only render on medium/high quality */}
+      {quality !== 'low' && (
+        <mesh castShadow={enableShadows} position={[0.05 * scale, -0.3 * scale, 0]}>
+          <sphereGeometry args={[0.03 * scale, Math.max(4, details.candleSegments / 2), 4]} />
         <meshStandardMaterial 
           color="#F0F0E6"
           roughness={0.9}
           metalness={0}
         />
-      </mesh>
+        </mesh>
+      )}
 
       {/* Candle Wick */}
       <mesh position={[0, 0.6 * scale, 0]}>
@@ -93,7 +127,7 @@ function Candle({
         ref={flameRef}
         position={[0, 0.7 * scale, 0]}
       >
-        <sphereGeometry args={[0.06 * scale, 6, 8]} />
+        <sphereGeometry args={[0.06 * scale, details.flameSegments, details.flameSegments]} />
         <meshStandardMaterial 
           color={flameColor}
           emissive={flameColor}
@@ -111,9 +145,9 @@ function Candle({
         intensity={lightIntensity}
         distance={3}
         decay={2}
-        castShadow
-        shadow-mapSize-width={512}
-        shadow-mapSize-height={512}
+        castShadow={enableShadows}
+        shadow-mapSize-width={details.shadowMapSize}
+        shadow-mapSize-height={details.shadowMapSize}
         shadow-camera-near={0.1}
         shadow-camera-far={5}
       />
@@ -123,19 +157,28 @@ function Candle({
 
 // Main FloatingCandles Component
 export default function FloatingCandles({
-  count = 6,
+  count,
   spread = 8,
   candleScale = 1,
-  lightIntensity = 0.4
+  lightIntensity,
+  forceLOD,
+  enableShadows
 }: FloatingCandlesProps) {
+  const { config } = useLODConfig();
+  
+  // Use LOD config if not overridden by props
+  const finalCount = count ?? config.floatingCandles.count;
+  const finalLightIntensity = lightIntensity ?? config.floatingCandles.lightIntensity;
+  const finalEnableShadows = enableShadows ?? config.floatingCandles.shadows;
+  const quality = forceLOD ?? (config.floatingCandles.quality as CandleQuality);
   
   // Generate candle positions
   const candles = useMemo(() => {
     const candleArray = [];
     
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < finalCount; i++) {
       // Create positions in a scattered pattern around the scene
-      const angle = (i / count) * Math.PI * 2;
+      const angle = (i / finalCount) * Math.PI * 2;
       const radius = 2 + Math.random() * (spread - 2);
       const x = Math.cos(angle) * radius + (Math.random() - 0.5) * 2;
       const z = Math.sin(angle) * radius + (Math.random() - 0.5) * 2;
@@ -150,7 +193,7 @@ export default function FloatingCandles({
     }
     
     return candleArray;
-  }, [count, spread, candleScale]);
+  }, [finalCount, spread, candleScale]);
 
   return (
     <group>
@@ -160,7 +203,9 @@ export default function FloatingCandles({
           position={candle.position}
           scale={candle.scale}
           animationOffset={candle.animationOffset}
-          lightIntensity={lightIntensity}
+          lightIntensity={finalLightIntensity}
+          quality={quality}
+          enableShadows={finalEnableShadows}
         />
       ))}
     </group>

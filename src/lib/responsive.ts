@@ -157,13 +157,14 @@ export const getResponsiveSpacing = (
 
 // Media query hook for React components
 export const useMediaQuery = (query: string): boolean => {
-  if (!isClient) return false;
-  
   const [matches, setMatches] = React.useState<boolean>(() => {
+    if (!isClient) return false;
     return window.matchMedia(query).matches;
   });
 
   React.useEffect(() => {
+    if (!isClient) return;
+    
     const mediaQuery = window.matchMedia(query);
     const handler = (event: MediaQueryListEvent) => setMatches(event.matches);
     
