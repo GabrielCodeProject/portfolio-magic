@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+dist
+build
+coverage
+.nyc_output
+*.log
+.env*
+.DS_Store
+*.tgz
+*.tar.gz
+public/sitemap.xml
+public/robots.txt

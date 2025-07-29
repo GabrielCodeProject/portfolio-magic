@@ -1,103 +1,101 @@
-import Image from "next/image";
+'use client';
+
+import dynamic from 'next/dynamic';
+
+import About from '@/components/About';
+import Hero from '@/components/Hero';
+import Skills from '@/components/Skills';
+import { LoadingSpinner } from '@/components/ui';
+
+const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), {
+  ssr: false,
+  loading: () => <LoadingSpinner size="lg" text="Loading theme..." />,
+});
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="relative">
+      {/* Fixed Theme Toggle */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle size="md" />
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Hero Section */}
+      <Hero />
+
+      {/* About Section */}
+      <About />
+
+      {/* Skills Section */}
+      <Skills />
+
+      {/* Demo Sections - Temporary for development */}
+      <section className="min-h-screen flex flex-col items-center justify-center p-8 bg-theme-bg-secondary">
+        {/* Loading Spinner Demo */}
+        <div className="mb-12">
+          <h2 className="font-cinzel text-2xl font-semibold mb-6 text-center text-theme-text-primary">
+            Magical Loading Spinners
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 glass p-6 rounded-lg">
+            <div className="text-center">
+              <LoadingSpinner variant="circular" size="md" />
+              <p className="text-xs text-theme-text-muted mt-2">Circular</p>
+            </div>
+            <div className="text-center">
+              <LoadingSpinner variant="dots" size="md" />
+              <p className="text-xs text-theme-text-muted mt-2">Dots</p>
+            </div>
+            <div className="text-center">
+              <LoadingSpinner variant="orb" size="md" />
+              <p className="text-xs text-theme-text-muted mt-2">Orb</p>
+            </div>
+            <div className="text-center">
+              <LoadingSpinner variant="magical" size="md" />
+              <p className="text-xs text-theme-text-muted mt-2">Magical</p>
+            </div>
+            <div className="text-center">
+              <LoadingSpinner variant="snitch" size="md" />
+              <p className="text-xs text-theme-text-muted mt-2">Snitch</p>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Demo Content */}
+        <div className="glass p-8 rounded-lg max-w-4xl w-full text-center">
+          <h2 className="font-cinzel text-3xl font-semibold mb-6 text-theme-text-primary">
+            Choose Your Magical Path
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="p-6 rounded-lg bg-slytherin-900/20 border border-slytherin-500/30">
+              <div className="text-4xl mb-4">🐍</div>
+              <h3 className="font-cinzel text-xl font-semibold text-slytherinGreen-400 mb-3">
+                House Slytherin
+              </h3>
+              <p className="text-sm text-theme-text-secondary">
+                Cunning, ambitious, and resourceful. Perfect for developers who
+                value efficiency and elegant solutions.
+              </p>
+            </div>
+            <div className="p-6 rounded-lg bg-gryffindor-900/20 border border-gryffindor-500/30">
+              <div className="text-4xl mb-4">🦁</div>
+              <h3 className="font-cinzel text-xl font-semibold text-gryffindorGold-400 mb-3">
+                House Gryffindor
+              </h3>
+              <p className="text-sm text-theme-text-secondary">
+                Brave, daring, and bold. Ideal for developers who take on
+                challenging projects and push boundaries.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-12 text-center">
+          <p className="font-philosopher text-sm text-theme-text-muted">
+            Portfolio Theme System Demo • More sections coming soon
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
