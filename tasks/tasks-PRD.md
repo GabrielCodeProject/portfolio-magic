@@ -29,13 +29,14 @@
 - `.prettierrc` - Prettier configuration for consistent code formatting
 - `.vscode/settings.json` - VSCode settings for optimal development experience
 
+- `components/3D/ThreeScene.tsx` - Main 3D scene wrapper component with WebGL support detection, accessibility features, and performance optimizations
+- `components/3D/FloatingCandles.tsx` - Animated floating candles with dynamic lighting, theme-responsive colors, and realistic flame effects
+- `components/3D/MovingPortraits.tsx` - Interactive magical portraits with cursor tracking, scroll effects, and theme-responsive mystical elements
+
 ### TODO: Components to be implemented in future tasks
 - `components/Layout.tsx` - Main layout wrapper with navigation and 3D canvas (Task 3.0)
 - `components/Navigation.tsx` - Site navigation with smooth scrolling, active section tracking, and magical styling
 - `components/Contact.tsx` - Contact form and social links with magical styling and form validation
-- `components/3D/ThreeScene.tsx` - Main 3D scene wrapper component (Task 4.1)
-- `components/3D/FloatingCandles.tsx` - Floating candles 3D component (Task 4.2)
-- `components/3D/MovingPortraits.tsx` - Moving portraits 3D component (Task 4.3)
 - `components/3D/GoldenSnitch.tsx` - Golden Snitch 3D component (Task 4.4)
 - `lib/seo.ts` - SEO configuration and meta tag utilities (Task 5.1)
 - `public/sitemap.xml` - Generated sitemap for SEO (Task 5.3)
@@ -78,9 +79,9 @@
   - [x] 3.9 Add micro-interactions and hover effects
 
 - [ ] 4.0 3D Magical Elements Integration
-  - [ ] 4.1 Set up React Three Fiber canvas and scene
-  - [ ] 4.2 Create floating candles component with point lights
-  - [ ] 4.3 Implement moving portraits with cursor/scroll interaction
+  - [x] 4.1 Set up React Three Fiber canvas and scene
+  - [x] 4.2 Create floating candles component with point lights
+  - [x] 4.3 Implement moving portraits with cursor/scroll interaction
   - [ ] 4.4 Develop Golden Snitch with animated wings and flight paths
   - [ ] 4.5 Add lazy loading for 3D elements
   - [ ] 4.6 Implement LOD optimization for mobile devices

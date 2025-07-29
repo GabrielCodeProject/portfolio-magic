@@ -46,3 +46,58 @@ export interface SEOMeta {
   url?: string;
   type?: 'website' | 'article';
 }
+
+// 3D Scene Types
+export interface ThreeSceneConfig {
+  enableShadows?: boolean;
+  enableFog?: boolean;
+  backgroundColor?: string;
+  cameraPosition?: [number, number, number];
+  cameraFov?: number;
+}
+
+export interface Vector3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface Rotation3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface MagicalElement {
+  id: string;
+  position: Vector3;
+  rotation?: Rotation3;
+  scale?: number | Vector3;
+  visible?: boolean;
+  interactive?: boolean;
+}
+
+export interface CandleConfig {
+  position: [number, number, number];
+  scale?: number;
+  animationOffset?: number;
+  lightIntensity?: number;
+}
+
+export interface FloatingCandlesConfig {
+  count?: number;
+  spread?: number;
+  candleScale?: number;
+  lightIntensity?: number;
+}
+
+export interface PortraitConfig {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: number;
+  portraitId: number;
+}
+
+export interface MovingPortraitsConfig {
+  count?: number;
+}

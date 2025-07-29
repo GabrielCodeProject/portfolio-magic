@@ -16,7 +16,8 @@
       "Bash(grep:*)",
       "Bash(npx tsc:*)",
       "Bash(grep:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(timeout 10 npm run dev)"
     ],
     "deny": []
   },

@@ -16,9 +16,43 @@ const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), {
   loading: () => <LoadingSpinner size="lg" text="Loading theme..." />,
 });
 
+const ThreeScene = dynamic(() => import('@/components/3D/ThreeScene'), {
+  ssr: false,
+  loading: () => <LoadingSpinner size="lg" variant="magical" text="Loading magical elements..." />,
+});
+
+const FloatingCandles = dynamic(() => import('@/components/3D/FloatingCandles'), {
+  ssr: false,
+});
+
+const MovingPortraits = dynamic(() => import('@/components/3D/MovingPortraits'), {
+  ssr: false,
+});
+
 export default function Home() {
   return (
     <div className="relative">
+      {/* 3D Scene Background */}
+      <ThreeScene 
+        config={{
+          enableShadows: true,
+          enableFog: true,
+          cameraPosition: [0, 0, 8],
+          cameraFov: 60,
+        }}
+        enablePerformanceMonitor={process.env.NODE_ENV === 'development'}
+      >
+        <FloatingCandles 
+          count={6}
+          spread={6}
+          candleScale={0.8}
+          lightIntensity={0.3}
+        />
+        <MovingPortraits 
+          count={4}
+        />
+      </ThreeScene>
+
       {/* Navigation */}
       <Navigation />
 
