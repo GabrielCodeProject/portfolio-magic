@@ -90,12 +90,9 @@ export default function Home() {
           candleScale={0.8}
           lightIntensity={0.3}
         />
-        {/* Temporarily disabled to test
         <LazyMovingPortraits 
           count={4}
         />
-        */}
-        {/* Temporarily disabled to test
         <LazyGoldenSnitch 
           bounds={{
             x: [-5, 5],
@@ -105,7 +102,6 @@ export default function Home() {
           speed={1.2}
           scale={1}
         />
-        */}
       </ThreeScene>
 
       {/* Navigation */}

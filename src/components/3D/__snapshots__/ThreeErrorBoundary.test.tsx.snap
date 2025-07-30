@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ThreeErrorBoundary Component Lifecycle should initialize with no error state 1`] = `
+<div
+  data-testid="initial-child"
+>
+  Initial content
+</div>
+`;
