@@ -40,93 +40,54 @@ export default function Lazy3DWrapper({
   delayMs = 0,
   preload = false,
 }: Lazy3DWrapperProps) {
-  const [shouldLoad, setShouldLoad] = useState(!enabled);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadStarted, setLoadStarted] = useState(false);
-
-  const { ref, isIntersecting, hasIntersected } = useIntersectionObserver({
-    threshold,
-    rootMargin,
-    triggerOnce: true,
-    enabled,
-  });
-
-  // Priority-based loading delays
-  const priorityDelays = {
-    high: 0,
-    medium: 100,
-    low: 300,
-  };
-
-  const totalDelay = priorityDelays[loadPriority] + delayMs;
-
+  const [shouldLoad, setShouldLoad] = useState(true); // Always load in Canvas context
+  
+  // For Canvas context, we can't use intersection observer
+  // So we'll use a simple delay-based loading
   useEffect(() => {
     if (!enabled) return;
 
-    if (preload || hasIntersected || isIntersecting) {
-      if (!loadStarted) {
-        setLoadStarted(true);
-        setIsLoading(true);
+    const priorityDelays = {
+      high: 0,
+      medium: 100,
+      low: 300,
+    };
 
-        const timer = setTimeout(() => {
-          setShouldLoad(true);
-          // Loading state will be handled by Suspense
-        }, totalDelay);
-
-        return () => clearTimeout(timer);
-      }
+    const totalDelay = priorityDelays[loadPriority] + delayMs;
+    
+    if (totalDelay > 0) {
+      setShouldLoad(false);
+      const timer = setTimeout(() => {
+        setShouldLoad(true);
+      }, totalDelay);
+      
+      return () => clearTimeout(timer);
     }
-  }, [preload, hasIntersected, isIntersecting, totalDelay, loadStarted, enabled]);
-
-  // Default placeholder
-  const defaultPlaceholder = (
-    <div className="flex items-center justify-center min-h-[200px]">
-      <div className="glass p-4 rounded-lg">
-        <p className="text-sm text-theme-text-muted">
-          3D content will load when visible
-        </p>
-      </div>
-    </div>
-  );
-
-  // Loading placeholder
-  const loadingPlaceholder = (
-    <div className="flex items-center justify-center min-h-[200px]">
-      <LoadingSpinner 
-        size="lg" 
-        variant="magical" 
-        text={loadingText}
-      />
-    </div>
-  );
+  }, [loadPriority, delayMs, enabled]);
 
   if (!enabled) {
-    return <div className={className}>{children}</div>;
+    return <>{children}</>;
   }
 
   return (
-    <div ref={ref} className={className}>
+    <group>
       {shouldLoad ? (
-        <Suspense fallback={loadingPlaceholder}>
+        <Suspense fallback={null}>
           {children}
         </Suspense>
-      ) : isLoading ? (
-        loadingPlaceholder
-      ) : (
-        placeholder || defaultPlaceholder
-      )}
-    </div>
+      ) : null}
+    </group>
   );
 }
 
 // Higher-order component for creating lazy-loaded 3D components
-export function withLazy3D<ComponentProps extends object>(
-  Component: React.ComponentType<ComponentProps>,
+export function withLazy3D(
+  Component: React.ComponentType<any>,
   options: Omit<Lazy3DWrapperProps, 'children'> = {}
 ) {
   const displayName = Component.displayName || Component.name || 'Component';
   
-  const LazyComponent = (props: ComponentProps) => (
+  const LazyComponent = (props: any) => (
     <Lazy3DWrapper {...options}>
       <Component {...props} />
     </Lazy3DWrapper>
@@ -138,19 +99,13 @@ export function withLazy3D<ComponentProps extends object>(
 }
 
 // Utility function to create dynamically imported lazy 3D components
-export function createLazy3DComponent<ComponentProps extends object>(
-  importFn: () => Promise<{ default: React.ComponentType<ComponentProps> }>,
+export function createLazy3DComponent(
+  importFn: () => Promise<{ default: React.ComponentType<any> }>,
   wrapperOptions: Omit<Lazy3DWrapperProps, 'children'> = {}
 ) {
   const DynamicComponent = dynamic(importFn, {
     ssr: false,
-    loading: () => (
-      <LoadingSpinner 
-        size="lg" 
-        variant="magical" 
-        text={wrapperOptions.loadingText || 'Loading 3D component...'}
-      />
-    ),
+    loading: () => null, // Avoid HTML elements in Canvas context
   });
 
   return withLazy3D(DynamicComponent, wrapperOptions);

@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   // Add trailing slash for GitHub Pages routing
   trailingSlash: true,
   
+  // Transpile Three.js for proper R3F compatibility
+  transpilePackages: ['three'],
+  
   // Disable image optimization for static export
   images: {
     unoptimized: true,

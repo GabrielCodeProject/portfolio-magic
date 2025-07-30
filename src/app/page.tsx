@@ -76,20 +76,20 @@ export default function Home() {
         enablePerformanceMonitor={process.env.NODE_ENV === 'development'}
       >
         {/*  problem seem to come from the lazy loading of the 3D components */}
+        {/*
         <FloatingCandles
           count={6}
           spread={6}
           candleScale={0.8}
           lightIntensity={0.3}
         />
-        {/* Temporarily disabled to test
+        */}
         <LazyFloatingCandles 
           count={6}
           spread={6}
           candleScale={0.8}
           lightIntensity={0.3}
         />
-        */}
         {/* Temporarily disabled to test
         <LazyMovingPortraits 
           count={4}

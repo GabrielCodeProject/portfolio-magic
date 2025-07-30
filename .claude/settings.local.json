@@ -25,13 +25,17 @@
       "mcp__playwright__browser_wait_for",
       "Bash(pkill:*)",
       "mcp__playwright__browser_install",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
     ],
     "deny": []
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
+    "shadcn-ui",
     "sequential-thinking",
-    "shadcn-ui"
+    "context7",
+    "playwright"
   ]
 }

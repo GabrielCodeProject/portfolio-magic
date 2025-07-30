@@ -65,9 +65,9 @@
 
 - [ ] 3.0 Implement Automated Testing Framework (Static-Compatible)
   - [x] 3.1 Set up React Three Test Renderer for 3D component testing (install `@react-three/test-renderer`)
-  - [ ] 3.2 Create unit tests for `FloatingCandles` component (mounting, unmounting, interactions)
-  - [ ] 3.3 Create unit tests for `MovingPortraits` component (mounting, unmounting, interactions)
-  - [ ] 3.4 Create unit tests for `GoldenSnitch` component (mounting, unmounting, interactions)
+  - [x] 3.2 Create unit tests for `FloatingCandles` component (mounting, unmounting, interactions)
+  - [x] 3.3 Create unit tests for `MovingPortraits` component (mounting, unmounting, interactions)
+  - [x] 3.4 Create unit tests for `GoldenSnitch` component (mounting, unmounting, interactions)
   - [ ] 3.5 Create unit tests for `ThreeErrorBoundary` (error catching, fallback rendering, localStorage logging)
   - [ ] 3.6 Create unit tests for `ClientPerformanceGate` (client-side detection, conditional rendering)
   - [ ] 3.7 Create unit tests for all fallback components (rendering, CSS animations, progressive enhancement)
