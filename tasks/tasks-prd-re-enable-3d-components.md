@@ -63,7 +63,7 @@
   - [x] 2.7 Test error boundary activation and fallback component rendering in static build
   - [x] 2.8 Ensure all fallback animations work without JavaScript (progressive enhancement)
 
-- [ ] 3.0 Implement Automated Testing Framework (Static-Compatible)
+- [x] 3.0 Implement Automated Testing Framework (Static-Compatible)
   - [x] 3.1 Set up React Three Test Renderer for 3D component testing (install `@react-three/test-renderer`)
   - [x] 3.2 Create unit tests for `FloatingCandles` component (mounting, unmounting, interactions)
   - [x] 3.3 Create unit tests for `MovingPortraits` component (mounting, unmounting, interactions)
@@ -77,15 +77,15 @@
   - [x] 3.11 Achieve 90%+ test coverage for all 3D-related components and hooks
 
 - [ ] 4.0 Progressive Re-enabling of 3D Components (Static-Compatible)
-  - [ ] 4.1 Wrap existing 3D components with `ThreeErrorBoundary` and `ClientPerformanceGate`
-  - [ ] 4.2 Re-enable `LazyFloatingCandles` component in `src/app/page.tsx` with client-side gating
-  - [ ] 4.3 Test FloatingCandles in development (`npm run dev`) - no console errors, proper rendering
-  - [ ] 4.4 Test FloatingCandles in static export (`npm run export`) - verify compatibility
-  - [ ] 4.5 Run automated tests for FloatingCandles and verify all pass
-  - [ ] 4.6 Re-enable `LazyMovingPortraits` component in `src/app/page.tsx` with client-side gating
-  - [ ] 4.7 Test MovingPortraits in development and static export (no errors, interactions working)
-  - [ ] 4.8 Run automated tests for MovingPortraits and verify all pass
-  - [ ] 4.9 Re-enable `LazyGoldenSnitch` component in `src/app/page.tsx` with client-side gating
+  - [x] 4.1 Wrap existing 3D components with `ThreeErrorBoundary` and `ClientPerformanceGate`
+  - [x] 4.2 Re-enable `LazyFloatingCandles` component in `src/app/page.tsx` with client-side gating
+  - [x] 4.3 Test FloatingCandles in development (`npm run dev`) - no console errors, proper rendering
+  - [x] 4.4 Test FloatingCandles in static export (`npm run export`) - verify compatibility
+  - [x] 4.5 Run automated tests for FloatingCandles and verify all pass
+  - [x] 4.6 Re-enable `LazyMovingPortraits` component in `src/app/page.tsx` with client-side gating
+  - [x] 4.7 Test MovingPortraits in development and static export (no errors, interactions working)
+  - [x] 4.8 Run automated tests for MovingPortraits and verify all pass
+  - [x] 4.9 Re-enable `LazyGoldenSnitch` component in `src/app/page.tsx` with client-side gating
   - [ ] 4.10 Test GoldenSnitch in development and static export (no errors, animations working)
   - [ ] 4.11 Run automated tests for GoldenSnitch and verify all pass
   - [ ] 4.12 Test fallback components activate correctly on simulated low-end devices
