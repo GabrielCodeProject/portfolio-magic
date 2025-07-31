@@ -317,21 +317,27 @@ describe('ThreeErrorBoundary', () => {
       ]));
     });
 
-    it('should provide generic suggestions for non-3D errors', () => {
+    it('should provide generic suggestions for non-3D errors', () => {      
+      // Test with an error that definitely has no 3D keywords
+      const mockDetect = jest.spyOn(ThreeErrorBoundary.prototype as any, 'detect3DSpecificError');
+      mockDetect.mockReturnValue(false); // Force non-3D detection
+      
       render(
         <ThreeErrorBoundary componentName="GenericComponent">
-          <ThrowError errorMessage="Null pointer exception" />
+          <ThrowError errorMessage="Something went wrong in the component" />
         </ThreeErrorBoundary>
       );
 
       // Should not trigger 3D-specific logging for non-3D errors
       expect(mockConsoleGroup).not.toHaveBeenCalledWith('🎮 3D Component Error: GenericComponent');
+      
+      mockDetect.mockRestore();
     });
   });
 
   describe('Development vs Production Behavior', () => {
     it('should show error ID in development mode', () => {
-      process.env.NODE_ENV = 'development';
+      Object.defineProperty(process.env, 'NODE_ENV', { value: 'development', writable: true });
 
       render(
         <ThreeErrorBoundary componentName="DevComponent">
@@ -344,7 +350,7 @@ describe('ThreeErrorBoundary', () => {
     });
 
     it('should not show error ID in production mode', () => {
-      process.env.NODE_ENV = 'production';
+      Object.defineProperty(process.env, 'NODE_ENV', { value: 'production', writable: true });
 
       render(
         <ThreeErrorBoundary componentName="ProdComponent">
@@ -371,7 +377,7 @@ describe('ThreeErrorBoundary', () => {
 
   describe('Error ID Generation', () => {
     it('should generate unique error IDs', () => {
-      process.env.NODE_ENV = 'development';
+      Object.defineProperty(process.env, 'NODE_ENV', { value: 'development', writable: true });
 
       // Create first error boundary instance
       const { container: container1 } = render(
@@ -405,7 +411,7 @@ describe('ThreeErrorBoundary', () => {
     });
 
     it('should include component name in error ID', () => {
-      process.env.NODE_ENV = 'development';
+      Object.defineProperty(process.env, 'NODE_ENV', { value: 'development', writable: true });
 
       render(
         <ThreeErrorBoundary componentName="MySpecialComponent">

@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 
-import { createLazy3DComponent, FloatingCandles } from '@/components/3D';
+import { createLazy3DComponent } from '@/components/3D';
 import About from '@/components/About';
 import Contact from '@/components/Contact';
 import Hero from '@/components/Hero';
@@ -75,29 +75,18 @@ export default function Home() {
         }}
         enablePerformanceMonitor={process.env.NODE_ENV === 'development'}
       >
-        {/*  problem seem to come from the lazy loading of the 3D components */}
-        {/*
-        <FloatingCandles
+        <LazyFloatingCandles
           count={6}
           spread={6}
           candleScale={0.8}
           lightIntensity={0.3}
         />
-        */}
-        <LazyFloatingCandles 
-          count={6}
-          spread={6}
-          candleScale={0.8}
-          lightIntensity={0.3}
-        />
-        <LazyMovingPortraits 
-          count={4}
-        />
-        <LazyGoldenSnitch 
+        <LazyMovingPortraits count={4} />
+        <LazyGoldenSnitch
           bounds={{
             x: [-5, 5],
             y: [-1, 5],
-            z: [-4, 4]
+            z: [-4, 4],
           }}
           speed={1.2}
           scale={1}

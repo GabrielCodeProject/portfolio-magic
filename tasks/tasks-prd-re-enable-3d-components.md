@@ -68,13 +68,13 @@
   - [x] 3.2 Create unit tests for `FloatingCandles` component (mounting, unmounting, interactions)
   - [x] 3.3 Create unit tests for `MovingPortraits` component (mounting, unmounting, interactions)
   - [x] 3.4 Create unit tests for `GoldenSnitch` component (mounting, unmounting, interactions)
-  - [ ] 3.5 Create unit tests for `ThreeErrorBoundary` (error catching, fallback rendering, localStorage logging)
-  - [ ] 3.6 Create unit tests for `ClientPerformanceGate` (client-side detection, conditional rendering)
-  - [ ] 3.7 Create unit tests for all fallback components (rendering, CSS animations, progressive enhancement)
-  - [ ] 3.8 Create unit tests for client-side performance monitoring hooks (RAF-based FPS tracking)
-  - [ ] 3.9 Create unit tests for device capability detection utilities (WebGL context testing)
-  - [ ] 3.10 Test static export build process with Jest (ensure tests pass in static context)
-  - [ ] 3.11 Achieve 90%+ test coverage for all 3D-related components and hooks
+  - [x] 3.5 Create unit tests for `ThreeErrorBoundary` (error catching, fallback rendering, localStorage logging)
+  - [x] 3.6 Create unit tests for `ClientPerformanceGate` (client-side detection, conditional rendering)
+  - [x] 3.7 Create unit tests for all fallback components (rendering, CSS animations, progressive enhancement)
+  - [x] 3.8 Create unit tests for client-side performance monitoring hooks (RAF-based FPS tracking)
+  - [x] 3.9 Create unit tests for device capability detection utilities (WebGL context testing)
+  - [x] 3.10 Test static export build process with Jest (ensure tests pass in static context)
+  - [x] 3.11 Achieve 90%+ test coverage for all 3D-related components and hooks
 
 - [ ] 4.0 Progressive Re-enabling of 3D Components (Static-Compatible)
   - [ ] 4.1 Wrap existing 3D components with `ThreeErrorBoundary` and `ClientPerformanceGate`

@@ -199,7 +199,7 @@ class ClientErrorLogger {
     severity: ErrorLogEntry['severity'] = 'high'
   ): void {
     this.logError(error, componentName, 'boundary', severity, {
-      componentStack: errorInfo.componentStack,
+      componentStack: errorInfo.componentStack || undefined,
     });
   }
 
