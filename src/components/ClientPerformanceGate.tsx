@@ -223,81 +223,37 @@ export function ClientPerformanceGate({
     return null;
   }
 
-  // Loading state
+  // Loading state - Return null for Canvas contexts to avoid R3F namespace errors
   if (state.isLoading) {
-    return (
-      <div className={className} id={id}>
-        {loadingComponent || (
-          <div className="flex items-center justify-center p-4">
-            <LoadingSpinner 
-              size="sm" 
-              variant="magical" 
-              text="Detecting device capabilities..." 
-            />
-          </div>
-        )}
-      </div>
-    );
+    return loadingComponent || null;
   }
 
-  // Error state
+  // Error state - Return null for Canvas contexts to avoid R3F namespace errors
   if (state.hasError) {
-    return (
-      <div className={className} id={id}>
-        {fallback || (
-          <div className="flex items-center justify-center p-4 text-theme-text-muted">
-            <span className="text-sm">3D effects unavailable</span>
-          </div>
-        )}
-      </div>
-    );
+    return fallback || null;
   }
 
   // Determine what to render based on capabilities and performance
   const shouldShowFallback = !state.shouldRender3D || !state.isPerformanceGood;
 
   if (shouldShowFallback) {
-    return (
-      <div className={className} id={id}>
-        {fallback || (
-          <div className="flex items-center justify-center p-4 text-theme-text-muted">
-            <span className="text-sm">
-              {!state.shouldRender3D 
-                ? "3D effects not supported on this device" 
-                : "Using optimized version for better performance"}
-            </span>
-          </div>
-        )}
-      </div>
-    );
+    // Return fallback or null for Canvas contexts to avoid R3F namespace errors
+    return fallback || null;
   }
 
   // Render 3D content with error boundary
+  // Use group for Canvas context compatibility
   return (
-    <div className={className} id={id}>
-      <Suspense 
-        fallback={
-          loadingComponent || (
-            <div className="flex items-center justify-center p-4">
-              <LoadingSpinner 
-                size="sm" 
-                variant="magical" 
-                text="Loading 3D component..." 
-              />
-            </div>
-          )
-        }
+    <Suspense fallback={loadingComponent || null}>
+      <PerformanceWrapper
+        performanceMonitor={performanceMonitor}
+        rafFpsMonitor={rafFpsMonitor}
+        componentType={componentType}
+        enableMonitoring={enablePerformanceMonitoring}
       >
-        <PerformanceWrapper
-          performanceMonitor={performanceMonitor}
-          rafFpsMonitor={rafFpsMonitor}
-          componentType={componentType}
-          enableMonitoring={enablePerformanceMonitoring}
-        >
-          {children}
-        </PerformanceWrapper>
-      </Suspense>
-    </div>
+        {children}
+      </PerformanceWrapper>
+    </Suspense>
   );
 }
 

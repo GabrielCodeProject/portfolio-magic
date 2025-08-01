@@ -104,21 +104,9 @@ class ThreeErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className="flex items-center justify-center p-8 bg-gray-900/20 rounded-lg border border-gray-700/30">
-          <div className="text-center">
-            <div className="text-yellow-400 mb-2">⚠️</div>
-            <p className="text-gray-400 text-sm">
-              3D component failed to load
-            </p>
-            {process.env.NODE_ENV === 'development' && this.state.errorId && (
-              <p className="text-gray-500 text-xs mt-2">
-                Error ID: {this.state.errorId}
-              </p>
-            )}
-          </div>
-        </div>
-      );
+      // Return null for Canvas contexts to avoid R3F namespace errors
+      // HTML elements cannot be rendered inside React Three Fiber Canvas
+      return this.props.fallback || null;
     }
 
     return this.props.children;
