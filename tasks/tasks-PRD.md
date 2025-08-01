@@ -37,7 +37,8 @@
 - `hooks/useIntersectionObserver.ts` - Hook for viewport intersection detection and lazy loading optimization
 - `hooks/useDevicePerformance.ts` - Device performance detection hook with LOD level calculation for mobile optimization
 
-### TODO: Components to be implemented in future tasks  
+### TODO: Components to be implemented in future tasks
+
 - `lib/seo.ts` - SEO configuration and meta tag utilities (Task 5.1)
 - `public/sitemap.xml` - Generated sitemap for SEO (Task 5.3)
 - `public/robots.txt` - Robots.txt file for search engines (Task 5.3)
@@ -83,8 +84,8 @@
   - [x] 4.2 Create floating candles component with point lights
   - [x] 4.3 Implement moving portraits with cursor/scroll interaction
   - [x] 4.4 Develop Golden Snitch with animated wings and flight paths
-  - [x] 4.5 Add lazy loading for 3D elements
-  - [x] 4.6 Implement LOD optimization for mobile devices
+  - [ ] 4.5 Add lazy loading for 3D elements
+  - [ ] 4.6 Implement LOD optimization for mobile devices
   - [ ] 4.7 Set up frustum culling and performance optimization
   - [ ] 4.8 Create fallback system for devices without 3D support
   - [ ] 4.9 Add reduced motion alternatives for accessibility
