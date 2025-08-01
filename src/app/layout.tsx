@@ -61,7 +61,9 @@ export default function RootLayout({
         className={`${cinzel.variable} ${philosopher.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

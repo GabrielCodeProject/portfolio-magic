@@ -5,7 +5,6 @@ import { useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 
 import { useTheme } from '@/hooks/useTheme';
-import { useLODConfig } from '@/hooks/useDevicePerformance';
 
 // Flight states for different behaviors
 type FlightState = 'searching' | 'darting' | 'hovering' | 'evasive';
@@ -117,12 +116,10 @@ export default function GoldenSnitch({
   forceLOD,
   enableTrailEffects
 }: GoldenSnitchProps) {
-  const { config } = useLODConfig();
-  
-  // Use LOD config if not overridden by props
-  const finalEnableTrailEffects = enableTrailEffects ?? config.goldenSnitch.trailEffects;
-  const quality = forceLOD ?? (config.goldenSnitch.wingDetail as SnitchQuality);
-  const flightComplexity = config.goldenSnitch.flightComplexity;
+  // Simple defaults without complex LOD config
+  const finalEnableTrailEffects = enableTrailEffects ?? true;
+  const quality = forceLOD ?? 'medium';
+  const flightComplexity: 'high' | 'medium' | 'low' = 'medium';
   const snitchRef = useRef<THREE.Group>(null);
   const [currentTarget, setCurrentTarget] = useState<THREE.Vector3>(new THREE.Vector3(0, 2, 0));
   const [flightState, setFlightState] = useState<FlightState>('searching');
@@ -137,7 +134,7 @@ export default function GoldenSnitch({
 
   // Flight parameters based on state and LOD
   const flightParams = useMemo(() => {
-    const complexityMultiplier = flightComplexity === 'high' ? 1 : flightComplexity === 'medium' ? 0.7 : 0.4;
+    const complexityMultiplier = 0.7; // Medium complexity
     
     switch (flightState) {
       case 'searching':
@@ -192,20 +189,7 @@ export default function GoldenSnitch({
   const updateFlightState = (deltaTime: number) => {
     setStateTimer(prev => prev + deltaTime);
 
-    // Simplified state transitions for low complexity
-    if (flightComplexity === 'low') {
-      if (stateTimer > 5 && flightState === 'searching') {
-        setFlightState('hovering');
-        setStateTimer(0);
-      } else if (stateTimer > 3 && flightState === 'hovering') {
-        setFlightState('searching');
-        setStateTimer(0);
-        generateNewTarget();
-      }
-      return;
-    }
-
-    // Full state transition logic for medium/high complexity
+    // Medium complexity state transitions
     if (stateTimer > 3 && flightState === 'searching') {
       if (Math.random() < 0.3) {
         setFlightState('darting');

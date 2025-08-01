@@ -5,7 +5,6 @@ import { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 
 import { useTheme } from '@/hooks/useTheme';
-import { useLODConfig } from '@/hooks/useDevicePerformance';
 
 // LOD quality levels
 type CandleQuality = 'high' | 'medium' | 'low';
@@ -157,20 +156,18 @@ function Candle({
 
 // Main FloatingCandles Component
 export default function FloatingCandles({
-  count,
+  count = 6,
   spread = 8,
   candleScale = 1,
-  lightIntensity,
-  forceLOD,
-  enableShadows
+  lightIntensity = 0.5,
+  forceLOD = 'medium',
+  enableShadows = true
 }: FloatingCandlesProps) {
-  const { config } = useLODConfig();
-  
-  // Use LOD config if not overridden by props
-  const finalCount = count ?? config.floatingCandles.count;
-  const finalLightIntensity = lightIntensity ?? config.floatingCandles.lightIntensity;
-  const finalEnableShadows = enableShadows ?? config.floatingCandles.shadows;
-  const quality = forceLOD ?? (config.floatingCandles.quality as CandleQuality);
+  // Simple defaults without complex LOD config
+  const finalCount = count;
+  const finalLightIntensity = lightIntensity;
+  const finalEnableShadows = enableShadows;
+  const quality = forceLOD;
   
   // Generate candle positions
   const candles = useMemo(() => {

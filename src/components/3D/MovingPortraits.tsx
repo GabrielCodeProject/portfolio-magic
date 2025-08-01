@@ -5,7 +5,6 @@ import { useRef, useState, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
 import { useTheme } from '@/hooks/useTheme';
-import { useLODConfig } from '@/hooks/useDevicePerformance';
 
 // LOD quality levels
 type PortraitQuality = 'high' | 'medium' | 'low';
@@ -274,12 +273,10 @@ export default function MovingPortraits({
   forceLOD,
   enableInteractivity
 }: MovingPortraitsProps) {
-  const { config } = useLODConfig();
-  
-  // Use LOD config if not overridden by props
-  const finalCount = count ?? config.movingPortraits.count;
-  const finalEnableInteractivity = enableInteractivity ?? config.movingPortraits.interactivity;
-  const quality = forceLOD ?? (config.movingPortraits.quality as PortraitQuality);
+  // Simple defaults without complex LOD config
+  const finalCount = count ?? 4;
+  const finalEnableInteractivity = enableInteractivity ?? true;
+  const quality = forceLOD ?? 'medium';
   const [mousePosition, setMousePosition] = useState(new THREE.Vector2(0.5, 0.5));
   const [scrollOffset, setScrollOffset] = useState(0);
 

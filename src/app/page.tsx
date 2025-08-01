@@ -3,14 +3,7 @@
 import dynamic from 'next/dynamic';
 
 import { createLazy3DComponent } from '@/components/3D';
-import ThreeErrorBoundary from '@/components/3D/ThreeErrorBoundary';
-import {
-  CandlesFallback,
-  PortraitsFallback,
-  SnitchFallback,
-} from '@/components/3D/fallbacks';
 import About from '@/components/About';
-import { ClientPerformanceGate } from '@/components/ClientPerformanceGate';
 import Contact from '@/components/Contact';
 import Hero from '@/components/Hero';
 import Navigation from '@/components/Navigation';
@@ -75,54 +68,24 @@ export default function Home() {
         }}
         enablePerformanceMonitor={process.env.NODE_ENV === 'development'}
       >
-        <ThreeErrorBoundary
-          componentName='FloatingCandles'
-          fallback={<CandlesFallback count={6} />}
-        >
-          <ClientPerformanceGate
-            componentType='candles'
-            fallback={<CandlesFallback count={6} />}
-          >
-            <LazyFloatingCandles
-              count={6}
-              spread={6}
-              candleScale={0.8}
-              lightIntensity={0.3}
-            />
-          </ClientPerformanceGate>
-        </ThreeErrorBoundary>
+        <LazyFloatingCandles
+          count={6}
+          spread={6}
+          candleScale={0.8}
+          lightIntensity={0.3}
+        />
 
-        <ThreeErrorBoundary
-          componentName='MovingPortraits'
-          fallback={<PortraitsFallback count={4} />}
-        >
-          <ClientPerformanceGate
-            componentType='portraits'
-            fallback={<PortraitsFallback count={4} />}
-          >
-            <LazyMovingPortraits count={4} />
-          </ClientPerformanceGate>
-        </ThreeErrorBoundary>
+        <LazyMovingPortraits count={4} />
 
-        <ThreeErrorBoundary
-          componentName='GoldenSnitch'
-          fallback={<SnitchFallback />}
-        >
-          <ClientPerformanceGate
-            componentType='snitch'
-            fallback={<SnitchFallback />}
-          >
-            <LazyGoldenSnitch
-              bounds={{
-                x: [-5, 5],
-                y: [-1, 5],
-                z: [-4, 4],
-              }}
-              speed={1.2}
-              scale={1}
-            />
-          </ClientPerformanceGate>
-        </ThreeErrorBoundary>
+        <LazyGoldenSnitch
+          bounds={{
+            x: [-5, 5],
+            y: [-1, 5],
+            z: [-4, 4],
+          }}
+          speed={1.2}
+          scale={1}
+        />
       </ThreeScene>
 
       {/* Navigation */}
