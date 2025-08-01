@@ -590,7 +590,7 @@ describe('MovingPortraits', () => {
       let errorThrown = false;
       try {
         await act(async () => {
-          render(
+          create(
             <TestWrapper>
               <MovingPortraits />
             </TestWrapper>

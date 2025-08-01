@@ -452,7 +452,7 @@ describe('FloatingCandles', () => {
       let errorThrown = false;
       try {
         await act(async () => {
-          render(
+          create(
             <TestWrapper>
               <FloatingCandles />
             </TestWrapper>

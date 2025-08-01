@@ -1,0 +1,171 @@
+'use client';
+
+import React, { Component, ReactNode } from 'react';
+import { CanvasPortalFallback, useCanvasPortalFallback } from './CanvasPortalFallback';
+import { errorLogger } from '@/utils/errorLogger';
+
+interface Props {
+  children: ReactNode;
+  fallbackComponent?: ReactNode;
+  componentName?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+}
+
+interface State {
+  hasError: boolean;
+  error?: Error;
+  errorId?: string;
+}
+
+/**
+ * Enhanced error boundary that can render HTML fallbacks outside Canvas context
+ * using the portal system, while staying compatible with R3F Canvas context
+ */
+class EnhancedThreeErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    const { componentName = 'Unknown3DComponent', severity = 'high' } = this.props;
+    
+    try {
+      errorLogger.logReactError(error, errorInfo, componentName, severity);
+      
+      this.setState({ 
+        errorId: `${componentName}_${Date.now()}` 
+      });
+
+      // Enhanced 3D-specific error logging
+      const is3DError = this.detect3DSpecificError(error);
+      if (is3DError) {
+        console.group(`🎮 3D Component Error: ${componentName}`);
+        console.error('Error Details:', error);
+        console.error('Component Stack:', errorInfo.componentStack);
+        console.error('Possible causes:', this.suggest3DErrorCauses(error));
+        console.groupEnd();
+      }
+
+    } catch (loggingError) {
+      console.error('Enhanced error logging failed:', loggingError);
+      console.error(`Enhanced Error Boundary caught error in ${componentName}:`, error, errorInfo);
+    }
+  }
+
+  private detect3DSpecificError(error: Error): boolean {
+    const errorMessage = error.message.toLowerCase();
+    const stack = error.stack?.toLowerCase() || '';
+    
+    const threejsKeywords = [
+      'webgl', 'three', 'shader', 'buffer', 'geometry', 'material',
+      'texture', 'canvas', 'context', 'renderer', 'scene', 'camera',
+      'namespace', 'extend' // R3F specific errors
+    ];
+    
+    return threejsKeywords.some(keyword => 
+      errorMessage.includes(keyword) || stack.includes(keyword)
+    );
+  }
+
+  private suggest3DErrorCauses(error: Error): string[] {
+    const suggestions: string[] = [];
+    const errorMessage = error.message.toLowerCase();
+    
+    if (errorMessage.includes('namespace') || errorMessage.includes('extend')) {
+      suggestions.push('HTML elements rendered inside Canvas context');
+      suggestions.push('Use portal-based fallbacks for HTML content');
+    }
+    
+    if (errorMessage.includes('webgl')) {
+      suggestions.push('WebGL not supported or context lost');
+      suggestions.push('GPU drivers may need updating');
+    }
+    
+    if (errorMessage.includes('shader')) {
+      suggestions.push('Shader compilation failed');
+      suggestions.push('Graphics card may not support required features');
+    }
+    
+    if (errorMessage.includes('buffer') || errorMessage.includes('memory')) {
+      suggestions.push('Insufficient GPU memory');
+      suggestions.push('Too many 3D objects loaded simultaneously');
+    }
+    
+    if (errorMessage.includes('texture')) {
+      suggestions.push('Texture loading failed');
+      suggestions.push('Image format not supported');
+    }
+    
+    if (suggestions.length === 0) {
+      suggestions.push('Generic 3D rendering error');
+      suggestions.push('Check browser console for more details');
+    }
+    
+    return suggestions;
+  }
+
+  render() {
+    const { fallbackComponent, componentName = 'Unknown3DComponent' } = this.props;
+    
+    if (this.state.hasError) {
+      const errorId = `error-${componentName}-${this.state.errorId}`;
+      
+      return (
+        <CanvasPortalFallback
+          id={errorId}
+          fallbackComponent={
+            fallbackComponent || (
+              <div className="fixed inset-0 pointer-events-none flex items-center justify-center">
+                <div className="glass p-4 rounded-lg pointer-events-auto">
+                  <div className="text-center">
+                    <div className="text-red-400 mb-2">🚫</div>
+                    <p className="text-sm text-theme-text-muted mb-2">
+                      3D component failed to load
+                    </p>
+                    <p className="text-xs text-theme-text-muted opacity-75">
+                      {componentName}
+                    </p>
+                    {process.env.NODE_ENV === 'development' && this.state.error && (
+                      <details className="mt-2 text-left">
+                        <summary className="text-xs cursor-pointer text-theme-text-muted">
+                          Error Details
+                        </summary>
+                        <pre className="text-xs mt-1 p-2 bg-black/20 rounded overflow-auto max-h-20">
+                          {this.state.error.message}
+                        </pre>
+                      </details>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          }
+          priority="high"
+          visible={true}
+        />
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+/**
+ * Functional wrapper component that provides portal context access
+ */
+interface ErrorBoundaryWrapperProps extends Props {
+  children: ReactNode;
+}
+
+export default function ErrorBoundaryWrapper(props: ErrorBoundaryWrapperProps) {
+  return (
+    <EnhancedThreeErrorBoundary {...props}>
+      {props.children}
+    </EnhancedThreeErrorBoundary>
+  );
+}
