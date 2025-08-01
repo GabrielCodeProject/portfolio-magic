@@ -41,7 +41,8 @@
       "Bash(chmod:*)",
       "Bash(./cleanup-fallback-system.sh:*)",
       "Bash(kill:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(timeout 15 npm run dev)"
     ],
     "deny": []
   },

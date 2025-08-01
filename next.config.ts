@@ -46,11 +46,11 @@ const nextConfig: NextConfig = {
     return config;
   },
   
-  // Experimental features for better static export
-  experimental: {
-    // Enable static export optimization
-    optimizePackageImports: ['@react-three/fiber', '@react-three/drei', 'three'],
-  },
+  // Experimental features for better static export - temporarily disabled for debugging  
+  // experimental: {
+  //   // Enable static export optimization
+  //   optimizePackageImports: ['@react-three/fiber', '@react-three/drei', 'three'],
+  // },
 };
 
 export default nextConfig;

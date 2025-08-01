@@ -32,6 +32,14 @@ export function useIntersectionObserver({
   useEffect(() => {
     if (!enabled || !ref.current) return;
 
+    // Check if we're in a browser environment first
+    if (typeof window === 'undefined') {
+      // SSR/Static generation: assume visible
+      setIsIntersecting(true);
+      setHasIntersected(true);
+      return;
+    }
+
     // Check if IntersectionObserver is supported
     if (!window.IntersectionObserver) {
       // Fallback: assume visible for unsupported browsers

@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { Suspense, useState, useEffect } from 'react';
 
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor';
 import { LoadingSpinner } from '@/components/ui';
 
 // Priority levels for progressive loading
@@ -26,7 +27,7 @@ interface Lazy3DWrapperProps {
 
 /**
  * Wrapper component for lazy loading 3D elements based on viewport visibility
- * Provides progressive loading with different priority levels
+ * Provides progressive loading with different priority levels and intersection-based loading
  */
 export default function Lazy3DWrapper({
   children,
@@ -40,39 +41,98 @@ export default function Lazy3DWrapper({
   delayMs = 0,
   preload = false,
 }: Lazy3DWrapperProps) {
-  const [shouldLoad, setShouldLoad] = useState(true); // Always load in Canvas context
+  // State management for loading phases
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   
-  // For Canvas context, we can't use intersection observer
-  // So we'll use a simple delay-based loading
+  // Performance monitoring for development
+  const { startMeasurement, endMeasurement } = usePerformanceMonitor({
+    componentName: loadingText || `${loadPriority}-priority-3d-component`,
+    priority: loadPriority,
+    enabled: process.env.NODE_ENV === 'development',
+  });
+  
+  // Handle mounting for SSR compatibility
   useEffect(() => {
-    if (!enabled) return;
+    setIsMounted(true);
+  }, []);
+
+  // Priority-based loading with optimized timing for better UX
+  useEffect(() => {
+    if (!enabled || !isMounted) return;
 
     const priorityDelays = {
-      high: 0,
-      medium: 100,
-      low: 300,
+      high: 50,    // Load almost immediately for critical elements
+      medium: 150, // Small delay for smoother loading sequence
+      low: 400,    // Longer delay for less critical elements
     };
 
     const totalDelay = priorityDelays[loadPriority] + delayMs;
     
-    if (totalDelay > 0) {
-      setShouldLoad(false);
-      const timer = setTimeout(() => {
-        setShouldLoad(true);
-      }, totalDelay);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [loadPriority, delayMs, enabled]);
+    // Start loading process
+    setIsLoading(true);
+    startMeasurement();
+    
+    const timer = setTimeout(() => {
+      setShouldLoad(true);
+      // Keep loading state for a smooth transition
+      setTimeout(() => {
+        setIsLoading(false);
+        endMeasurement();
+      }, 200);
+    }, totalDelay);
+    
+    return () => {
+      clearTimeout(timer);
+      setIsLoading(false);
+    };
+  }, [loadPriority, delayMs, enabled, isMounted, startMeasurement, endMeasurement]);
 
   if (!enabled) {
-    return <>{children}</>;
+    return <group>{children}</group>;
+  }
+
+  // Don't render anything during SSR to prevent hydration mismatches
+  if (!isMounted) {
+    return <group />;
+  }
+
+  // Show loading placeholder while loading
+  if (isLoading && !shouldLoad) {
+    return (
+      <group>
+        {/* Minimal 3D loading indicator - a simple pulsing sphere */}
+        <mesh position={[0, 0, 0]}>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshBasicMaterial 
+            color="#8B5CF6" 
+            transparent 
+            opacity={0.6}
+          />
+        </mesh>
+      </group>
+    );
   }
 
   return (
     <group>
       {shouldLoad ? (
-        <Suspense fallback={null}>
+        <Suspense 
+          fallback={
+            <group>
+              {/* Loading placeholder visible during component loading */}
+              <mesh position={[0, 0, 0]}>
+                <sphereGeometry args={[0.05, 6, 6]} />
+                <meshBasicMaterial 
+                  color="#10B981" 
+                  transparent 
+                  opacity={0.4}
+                />
+              </mesh>
+            </group>
+          }
+        >
           {children}
         </Suspense>
       ) : null}

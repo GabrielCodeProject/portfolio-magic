@@ -1,7 +1,7 @@
 import { ClientErrorLogger, errorLogger, type ErrorLogEntry } from './errorLogger';
 
 // Mock localStorage
-const mockLocalStorage = (() => {
+const createMockLocalStorage = () => {
   let store: Record<string, string> = {};
 
   return {
@@ -16,7 +16,9 @@ const mockLocalStorage = (() => {
       store = {};
     }),
   };
-})();
+};
+
+let mockLocalStorage = createMockLocalStorage();
 
 // Mock console methods
 const mockConsole = {
@@ -37,11 +39,18 @@ describe('ClientErrorLogger', () => {
     originalLocalStorage = global.localStorage;
     originalConsole = global.console;
 
+    // Create fresh mock for each test
+    mockLocalStorage = createMockLocalStorage();
+    
+    // Clear mocks
+    jest.clearAllMocks();
+
     // Mock window and localStorage
     global.window = {
       location: { href: 'https://example.com/test' },
       innerWidth: 1920,
       innerHeight: 1080,
+      localStorage: mockLocalStorage,
     } as any;
 
     global.localStorage = mockLocalStorage as any;

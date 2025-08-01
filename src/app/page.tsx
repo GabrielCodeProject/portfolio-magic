@@ -17,28 +17,29 @@ const ThreeScene = dynamic(() => import('@/components/3D/ThreeScene'), {
   loading: () => null, // Avoid HTML elements in Canvas context
 });
 
-// Medium priority: Atmospheric effects (loads with slight delay)
+// High priority: Atmospheric effects (loads first for immediate ambiance)
 const LazyFloatingCandles = createLazy3DComponent(
   () => import('@/components/3D/FloatingCandles'),
   {
-    loadPriority: 'medium',
-    loadingText: 'Lighting the candles...',
+    loadPriority: 'high',
+    loadingText: 'Lighting the magical candles...',
     threshold: 0.2,
+    rootMargin: '200px', // Load early for better experience
+  }
+);
+
+// Medium priority: Interactive portraits (loads after candles)
+const LazyMovingPortraits = createLazy3DComponent(
+  () => import('@/components/3D/MovingPortraits'),
+  {
+    loadPriority: 'medium',
+    loadingText: 'Awakening the portraits...',
+    threshold: 0.1,
     rootMargin: '150px',
   }
 );
 
-// Low priority: Complex interactions (loads last)
-const LazyMovingPortraits = createLazy3DComponent(
-  () => import('@/components/3D/MovingPortraits'),
-  {
-    loadPriority: 'low',
-    loadingText: 'Awakening the portraits...',
-    threshold: 0.1,
-    rootMargin: '100px',
-  }
-);
-
+// Low priority: Complex Golden Snitch (loads last)
 const LazyGoldenSnitch = createLazy3DComponent(
   () => import('@/components/3D/GoldenSnitch'),
   {
@@ -46,7 +47,7 @@ const LazyGoldenSnitch = createLazy3DComponent(
     loadingText: 'Releasing the Golden Snitch...',
     threshold: 0.1,
     rootMargin: '100px',
-    delayMs: 200, // Additional delay for the most complex component
+    delayMs: 100, // Reduced delay for smoother experience
   }
 );
 
