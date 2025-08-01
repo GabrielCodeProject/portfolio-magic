@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { useSafeTheme } from '@/components/ThemeProvider';
+import { ThemeToggle } from './ThemeToggle';
 import { cn } from '@/lib/utils';
 
 interface NavigationProps {
@@ -183,6 +184,11 @@ export const Navigation: React.FC<NavigationProps> = ({ className }) => {
             ))}
           </div>
 
+          {/* Theme Toggle - Desktop */}
+          <div className="hidden lg:block ml-4">
+            <ThemeToggle size="sm" showLabels={false} />
+          </div>
+
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -222,6 +228,11 @@ export const Navigation: React.FC<NavigationProps> = ({ className }) => {
           )}
         >
           <div className="glass backdrop-blur-md border-b border-theme-border/50 mx-6 mt-2 rounded-lg p-4">
+            {/* Theme Toggle - Mobile */}
+            <div className="flex justify-center mb-4 pb-4 border-b border-theme-border/30">
+              <ThemeToggle size="sm" showLabels={true} />
+            </div>
+            
             <div className="grid grid-cols-2 gap-2">
               {navItems.map((item) => (
                 <a

@@ -11,10 +11,6 @@ import Projects from '@/components/Projects';
 import Services from '@/components/Services';
 import Skills from '@/components/Skills';
 
-const ThemeToggle = dynamic(() => import('@/components/ThemeToggle'), {
-  ssr: false,
-  loading: () => null, //<LoadingSpinner size='lg' text='Loading theme...' />,
-});
 
 // High priority: Core ThreeScene (loads immediately when visible)
 const ThreeScene = dynamic(() => import('@/components/3D/ThreeScene'), {
@@ -91,10 +87,6 @@ export default function Home() {
       {/* Navigation */}
       <Navigation />
 
-      {/* Fixed Theme Toggle */}
-      <div className='fixed top-6 right-6 z-50'>
-        <ThemeToggle size='md' />
-      </div>
 
       {/* Hero Section */}
       <Hero />

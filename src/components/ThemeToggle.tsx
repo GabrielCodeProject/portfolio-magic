@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { useTheme } from '@/components/ThemeProvider';
+import { useSafeTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
 
 interface ThemeToggleProps {
@@ -17,7 +17,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   showLabels = true,
 }) => {
   const [mounted, setMounted] = useState(false);
-  const { theme, toggleTheme, isSlytherin, isGryffindor } = useTheme();
+  const { theme, toggleTheme, isSlytherin, isGryffindor } = useSafeTheme();
 
   useEffect(() => {
     setMounted(true);

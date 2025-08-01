@@ -39,7 +39,9 @@
       "mcp__playwright__browser_close",
       "Bash(node:*)",
       "Bash(chmod:*)",
-      "Bash(./cleanup-fallback-system.sh:*)"
+      "Bash(./cleanup-fallback-system.sh:*)",
+      "Bash(kill:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   },
