@@ -11,7 +11,6 @@ import Projects from '@/components/Projects';
 import Services from '@/components/Services';
 import Skills from '@/components/Skills';
 
-
 // High priority: Core ThreeScene (loads immediately when visible)
 const ThreeScene = dynamic(() => import('@/components/3D/ThreeScene'), {
   ssr: false,
@@ -86,7 +85,6 @@ export default function Home() {
 
       {/* Navigation */}
       <Navigation />
-
 
       {/* Hero Section */}
       <Hero />
