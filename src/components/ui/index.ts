@@ -35,5 +35,9 @@ export {
 
 export { LoadingSpinner } from './LoadingSpinner';
 
+// Mobile Optimization Components
+export { default as MobileLoadingIndicator, Mobile3DLoadingSkeleton, ProgressiveLoader } from './MobileLoadingIndicator';
+export { default as MobileOptimizedScene, useSceneOptimizations } from './MobileOptimizedScene';
+
 // TODO: Implement in future tasks
 // export { default as Modal } from './Modal';

@@ -5,9 +5,7 @@ import { useRef, useState, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 
 import { useTheme } from '@/hooks/useTheme';
-
-// LOD quality levels
-type PortraitQuality = 'high' | 'medium' | 'low';
+import { useLODConfig, shouldRenderComponent, useDevicePerformance } from '@/hooks/useDevicePerformance';
 
 // Individual portrait properties
 interface PortraitProps {
@@ -17,16 +15,14 @@ interface PortraitProps {
   portraitId: number;
   mousePosition: THREE.Vector2;
   scrollOffset: number;
-  quality?: PortraitQuality;
+  geometryComplexity?: number;
+  animationFidelity?: number;
   interactivity?: boolean;
 }
 
 // Moving portraits component props
 interface MovingPortraitsProps {
   count?: number;
-  // LOD props - if provided, override automatic detection
-  forceLOD?: PortraitQuality;
-  enableInteractivity?: boolean;
 }
 
 // Individual Portrait Component
@@ -37,7 +33,8 @@ function Portrait({
   portraitId,
   mousePosition,
   scrollOffset,
-  quality = 'medium',
+  geometryComplexity = 0.7,
+  animationFidelity = 0.7,
   interactivity = true
 }: PortraitProps) {
   const portraitRef = useRef<THREE.Group>(null);
@@ -54,29 +51,10 @@ function Portrait({
   // Portrait-specific animation offset
   const animationOffset = portraitId * 0.7;
 
-  // LOD-based geometry complexity
-  const geometryDetails = {
-    high: {
-      frameSegments: 16,
-      canvasSegments: 12,
-      eyeSegments: 8,
-      animationFidelity: 1.0,
-    },
-    medium: {
-      frameSegments: 8,
-      canvasSegments: 6,
-      eyeSegments: 6,
-      animationFidelity: 0.7,
-    },
-    low: {
-      frameSegments: 4,
-      canvasSegments: 4,
-      eyeSegments: 4,
-      animationFidelity: 0.3,
-    },
-  };
-
-  const details = geometryDetails[quality];
+  // LOD-based geometry complexity - dynamically calculated
+  const frameSegments = Math.max(4, Math.floor(16 * geometryComplexity));
+  const canvasSegments = Math.max(4, Math.floor(12 * geometryComplexity));
+  const eyeSegments = Math.max(4, Math.floor(8 * geometryComplexity));
 
   // Animation and interaction
   useFrame((state) => {
@@ -98,12 +76,12 @@ function Portrait({
       const direction = mouse3D.clone().sub(portraitWorldPos).normalize();
 
       // Limit the look-at range
-      const maxLookDistance = 0.3 * details.animationFidelity;
+      const maxLookDistance = 0.3 * animationFidelity;
       const lookAtX = Math.max(-maxLookDistance, Math.min(maxLookDistance, direction.x * 0.5));
       const lookAtY = Math.max(-maxLookDistance, Math.min(maxLookDistance, direction.y * 0.5));
 
-      // Smooth interpolation for natural movement (reduced fidelity for lower LOD)
-      const lerpFactor = 0.05 * details.animationFidelity;
+      // Smooth interpolation for natural movement (reduced fidelity for lower complexity)
+      const lerpFactor = 0.05 * animationFidelity;
       eyesRef.current.position.x = THREE.MathUtils.lerp(
         eyesRef.current.position.x,
         lookAtX,
@@ -117,22 +95,22 @@ function Portrait({
     }
 
     // Idle animations (scaled by animation fidelity)
-    const idleFloat = Math.sin(time * 0.5 + animationOffset) * 0.01 * details.animationFidelity;
-    const idleTilt = Math.cos(time * 0.3 + animationOffset) * 0.005 * details.animationFidelity;
+    const idleFloat = Math.sin(time * 0.5 + animationOffset) * 0.01 * animationFidelity;
+    const idleTilt = Math.cos(time * 0.3 + animationOffset) * 0.005 * animationFidelity;
     
     portraitRef.current.position.y = position[1] + idleFloat;
     portraitRef.current.rotation.z = rotation[2] + idleTilt;
 
     // Scroll-based effects (only if interactivity is enabled)
     if (interactivity) {
-      const scrollInfluence = scrollOffset * 0.001 * details.animationFidelity;
+      const scrollInfluence = scrollOffset * 0.001 * animationFidelity;
       contentRef.current.rotation.z = scrollInfluence * Math.sin(animationOffset);
     }
 
-    // Subtle pulsing effect for the magical elements (reduced for low LOD)
-    const pulseIntensity = quality === 'low' ? 0.05 : 0.1;
+    // Subtle pulsing effect for the magical elements (reduced for low complexity)
+    const pulseIntensity = geometryComplexity < 0.4 ? 0.05 : 0.1;
     const pulse = 0.8 + Math.sin(time * 2 + animationOffset) * pulseIntensity;
-    contentRef.current.scale.setScalar(pulse * details.animationFidelity + (1 - details.animationFidelity));
+    contentRef.current.scale.setScalar(pulse * animationFidelity + (1 - animationFidelity));
   });
 
   // Validate props after all hooks have been called
@@ -161,23 +139,23 @@ function Portrait({
           <meshStandardMaterial color={primaryColor} roughness={0.6} metalness={0.4} />
         </mesh>
         
-        {/* Corner ornaments - only render on medium/high quality */}
-        {quality !== 'low' && (
+        {/* Corner ornaments - only render on medium/high complexity */}
+        {geometryComplexity > 0.4 && (
           <>
             <mesh position={[0.8 * scale, 1.0 * scale, 0]}>
-              <sphereGeometry args={[0.08 * scale, details.frameSegments / 2, details.frameSegments / 2]} />
+              <sphereGeometry args={[0.08 * scale, Math.max(4, frameSegments / 2), Math.max(4, frameSegments / 2)]} />
               <meshStandardMaterial color={secondaryColor} roughness={0.5} metalness={0.5} />
             </mesh>
             <mesh position={[-0.8 * scale, 1.0 * scale, 0]}>
-              <sphereGeometry args={[0.08 * scale, details.frameSegments / 2, details.frameSegments / 2]} />
+              <sphereGeometry args={[0.08 * scale, Math.max(4, frameSegments / 2), Math.max(4, frameSegments / 2)]} />
               <meshStandardMaterial color={secondaryColor} roughness={0.5} metalness={0.5} />
             </mesh>
             <mesh position={[0.8 * scale, -1.0 * scale, 0]}>
-              <sphereGeometry args={[0.08 * scale, details.frameSegments / 2, details.frameSegments / 2]} />
+              <sphereGeometry args={[0.08 * scale, Math.max(4, frameSegments / 2), Math.max(4, frameSegments / 2)]} />
               <meshStandardMaterial color={secondaryColor} roughness={0.5} metalness={0.5} />
             </mesh>
             <mesh position={[-0.8 * scale, -1.0 * scale, 0]}>
-              <sphereGeometry args={[0.08 * scale, details.frameSegments / 2, details.frameSegments / 2]} />
+              <sphereGeometry args={[0.08 * scale, Math.max(4, frameSegments / 2), Math.max(4, frameSegments / 2)]} />
               <meshStandardMaterial color={secondaryColor} roughness={0.5} metalness={0.5} />
             </mesh>
           </>
@@ -188,7 +166,7 @@ function Portrait({
       <group ref={contentRef}>
         {/* Background */}
         <mesh position={[0, 0, -0.02]}>
-          <planeGeometry args={[1.6 * scale, 2.2 * scale, details.canvasSegments, details.canvasSegments]} />
+          <planeGeometry args={[1.6 * scale, 2.2 * scale, canvasSegments, canvasSegments]} />
           <meshStandardMaterial 
             color="#2A2A2A"
             roughness={0.9}
@@ -210,7 +188,7 @@ function Portrait({
         <group ref={eyesRef}>
           {/* Left eye */}
           <mesh position={[-0.25 * scale, 0.3 * scale, 0.01]}>
-            <sphereGeometry args={[0.08 * scale, details.eyeSegments, details.eyeSegments]} />
+            <sphereGeometry args={[0.08 * scale, eyeSegments, eyeSegments]} />
             <meshStandardMaterial 
               color={secondaryColor}
               emissive={secondaryColor}
@@ -220,7 +198,7 @@ function Portrait({
           
           {/* Right eye */}
           <mesh position={[0.25 * scale, 0.3 * scale, 0.01]}>
-            <sphereGeometry args={[0.08 * scale, details.eyeSegments, details.eyeSegments]} />
+            <sphereGeometry args={[0.08 * scale, eyeSegments, eyeSegments]} />
             <meshStandardMaterial 
               color={secondaryColor}
               emissive={secondaryColor}
@@ -270,15 +248,41 @@ function Portrait({
 // Main Moving Portraits Component
 export default function MovingPortraits({
   count,
-  forceLOD,
-  enableInteractivity
 }: MovingPortraitsProps) {
-  // Simple defaults without complex LOD config
-  const finalCount = count ?? 4;
-  const finalEnableInteractivity = enableInteractivity ?? true;
-  const quality = forceLOD ?? 'medium';
+  const lodConfig = useLODConfig();
+  const devicePerformance = useDevicePerformance();
+  
+  // Check if component should render at all
+  if (!shouldRenderComponent('movingPortraits', lodConfig)) {
+    return null;
+  }
+  
+  // Get LOD configuration
+  const config = lodConfig.getComponentConfig('movingPortraits');
+  if (!config) {
+    console.warn('MovingPortraits: No LOD configuration found');
+    return null;
+  }
+  
+  // Use LOD config with optional overrides
+  const finalCount = count ?? config.instanceCount ?? 4;
+  const finalEnableInteractivity = config.enableInteractivity ?? true;
+  const geometryComplexity = config.geometryComplexity ?? 0.7;
+  const animationFidelity = config.animationFidelity ?? 0.7;
   const [mousePosition, setMousePosition] = useState(new THREE.Vector2(0.5, 0.5));
   const [scrollOffset, setScrollOffset] = useState(0);
+  
+  // Performance logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🖼️ MovingPortraits LOD Config:', {
+      level: lodConfig.level,
+      count: finalCount,
+      interactivity: finalEnableInteractivity,
+      complexity: geometryComplexity,
+      fidelity: animationFidelity,
+      isMobile: devicePerformance.isMobile,
+    });
+  }
 
   // Mouse tracking
   useEffect(() => {
@@ -377,7 +381,8 @@ export default function MovingPortraits({
           scale={portrait.scale}
           mousePosition={mousePosition}
           scrollOffset={scrollOffset}
-          quality={quality}
+          geometryComplexity={geometryComplexity}
+          animationFidelity={animationFidelity}
           interactivity={finalEnableInteractivity}
         />
       ))}

@@ -173,7 +173,7 @@ export default function GoldenSnitch({
           agility: 0.02 * complexityMultiplier 
         };
     }
-  }, [flightState, speed, flightComplexity]);
+  }, [flightState, speed]);
 
   // Generate new random target within bounds
   const generateNewTarget = () => {

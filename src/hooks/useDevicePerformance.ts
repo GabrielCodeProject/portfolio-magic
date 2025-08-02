@@ -9,18 +9,30 @@ export interface LODConfig {
       particleCount?: number;
       enableShadows?: boolean;
       enableReflections?: boolean;
+      geometryComplexity?: number;
+      shadowMapSize?: number;
+      enableInteractivity?: boolean;
+      animationFidelity?: number;
     };
     mediumDetail: {
       instanceCount?: number;
       particleCount?: number;
       enableShadows?: boolean;
       enableReflections?: boolean;
+      geometryComplexity?: number;
+      shadowMapSize?: number;
+      enableInteractivity?: boolean;
+      animationFidelity?: number;
     };
     highDetail: {
       instanceCount?: number;
       particleCount?: number;
       enableShadows?: boolean;
       enableReflections?: boolean;
+      geometryComplexity?: number;
+      shadowMapSize?: number;
+      enableInteractivity?: boolean;
+      animationFidelity?: number;
     };
   };
 }
@@ -31,6 +43,7 @@ export interface DevicePerformance {
   level: LODLevel;
   memoryMB: number;
   isLowPowerDevice: boolean;
+  isMobile: boolean;
   supportedFeatures: {
     webgl2: boolean;
     shadows: boolean;
@@ -44,16 +57,22 @@ const defaultLODConfig: LODConfig = {
       instanceCount: 3,
       enableShadows: false,
       enableReflections: false,
+      geometryComplexity: 0.3,
+      shadowMapSize: 256,
     },
     mediumDetail: {
       instanceCount: 6,
       enableShadows: true,
       enableReflections: false,
+      geometryComplexity: 0.7,
+      shadowMapSize: 512,
     },
     highDetail: {
       instanceCount: 12,
       enableShadows: true,
       enableReflections: true,
+      geometryComplexity: 1.0,
+      shadowMapSize: 1024,
     },
   },
   movingPortraits: {
@@ -61,16 +80,28 @@ const defaultLODConfig: LODConfig = {
       instanceCount: 2,
       enableShadows: false,
       enableReflections: false,
+      geometryComplexity: 0.4,
+      shadowMapSize: 256,
+      enableInteractivity: false,
+      animationFidelity: 0.3,
     },
     mediumDetail: {
       instanceCount: 4,
       enableShadows: false,
       enableReflections: true,
+      geometryComplexity: 0.7,
+      shadowMapSize: 512,
+      enableInteractivity: true,
+      animationFidelity: 0.7,
     },
     highDetail: {
       instanceCount: 6,
       enableShadows: true,
       enableReflections: true,
+      geometryComplexity: 1.0,
+      shadowMapSize: 1024,
+      enableInteractivity: true,
+      animationFidelity: 1.0,
     },
   },
   goldenSnitch: {
@@ -78,16 +109,28 @@ const defaultLODConfig: LODConfig = {
       particleCount: 20,
       enableShadows: false,
       enableReflections: false,
+      geometryComplexity: 0.3,
+      shadowMapSize: 256,
+      enableInteractivity: false,
+      animationFidelity: 0.3,
     },
     mediumDetail: {
       particleCount: 50,
       enableShadows: true,
       enableReflections: false,
+      geometryComplexity: 0.7,
+      shadowMapSize: 512,
+      enableInteractivity: true,
+      animationFidelity: 0.7,
     },
     highDetail: {
       particleCount: 100,
       enableShadows: true,
       enableReflections: true,
+      geometryComplexity: 1.0,
+      shadowMapSize: 1024,
+      enableInteractivity: true,
+      animationFidelity: 1.0,
     },
   },
 };
@@ -98,6 +141,7 @@ function detectDevicePerformance(): DevicePerformance {
       level: 'medium',
       memoryMB: 4096,
       isLowPowerDevice: false,
+      isMobile: false,
       supportedFeatures: {
         webgl2: true,
         shadows: true,
@@ -146,6 +190,7 @@ function detectDevicePerformance(): DevicePerformance {
     level,
     memoryMB,
     isLowPowerDevice,
+    isMobile,
     supportedFeatures,
   };
 }
@@ -179,4 +224,31 @@ export function useLODConfig() {
       return componentConfig[levelKey];
     },
   };
+}
+
+// Utility function to check if component should be rendered at all
+export function shouldRenderComponent(componentName: string, lodConfig: any): boolean {
+  const config = lodConfig.getComponentConfig(componentName);
+  if (!config) return false;
+  
+  // Check if instance count is 0 (disabled)
+  if ('instanceCount' in config && config.instanceCount === 0) {
+    return false;
+  }
+  
+  // Check if particle count is 0 (disabled)
+  if ('particleCount' in config && config.particleCount === 0) {
+    return false;
+  }
+  
+  return true;
+}
+
+// Utility function to get performance-adjusted delay for animations
+export function getPerformanceAdjustedDelay(baseDelay: number, devicePerformance: DevicePerformance): number {
+  if (devicePerformance.isMobile) {
+    // Increase delays on mobile to reduce battery drain
+    return baseDelay * (devicePerformance.isLowPowerDevice ? 2 : 1.5);
+  }
+  return baseDelay;
 }

@@ -64,15 +64,17 @@ export default function Home() {
         }}
         enablePerformanceMonitor={process.env.NODE_ENV === 'development'}
       >
+        {/* FloatingCandles now uses automatic LOD configuration */}
         <LazyFloatingCandles
-          count={6}
           spread={6}
           candleScale={0.8}
           lightIntensity={0.3}
         />
 
-        <LazyMovingPortraits count={4} />
+        {/* MovingPortraits now uses automatic LOD configuration */}
+        <LazyMovingPortraits />
 
+        {/* GoldenSnitch now uses automatic LOD configuration */}
         <LazyGoldenSnitch
           bounds={{
             x: [-5, 5],

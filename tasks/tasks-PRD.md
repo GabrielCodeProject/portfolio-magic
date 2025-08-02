@@ -37,6 +37,9 @@
 - `hooks/useIntersectionObserver.ts` - Hook for viewport intersection detection and lazy loading optimization
 - `hooks/useDevicePerformance.ts` - Device performance detection hook with LOD level calculation for mobile optimization and 3D component configuration
 - `hooks/usePerformanceMonitor.tsx` - Development-time performance monitoring hook for 3D component loading analytics
+- `hooks/useReducedMotion.tsx` - Accessibility hook for reduced motion preferences with WCAG 2.1 AA compliance
+- `components/ui/MobileLoadingIndicator.tsx` - Mobile-optimized loading indicator with progress tracking and device-specific messaging
+- `components/ui/MobileOptimizedScene.tsx` - Performance-aware 3D canvas wrapper with adaptive rendering and mobile optimizations
 
 ### TODO: Components to be implemented in future tasks
 
@@ -86,7 +89,7 @@
   - [x] 4.3 Implement moving portraits with cursor/scroll interaction
   - [x] 4.4 Develop Golden Snitch with animated wings and flight paths
   - [x] 4.5 Add lazy loading for 3D elements
-  - [ ] 4.6 Implement LOD optimization for mobile devices
+  - [x] 4.6 Implement LOD optimization for mobile devices
   - [ ] 4.7 Set up frustum culling and performance optimization
   - [ ] 4.8 Create fallback system for devices without 3D support
   - [ ] 4.9 Add reduced motion alternatives for accessibility
