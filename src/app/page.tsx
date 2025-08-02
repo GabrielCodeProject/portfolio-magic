@@ -2,7 +2,11 @@
 
 import dynamic from 'next/dynamic';
 
-import { createLazy3DComponent } from '@/components/3D';
+import { 
+  FloatingCandlesLazy, 
+  MovingPortraitsLazy, 
+  GoldenSnitchLazy 
+} from '@/components/3D/Lazy3DWrapperFixed';
 import About from '@/components/About';
 import Contact from '@/components/Contact';
 import Hero from '@/components/Hero';
@@ -11,50 +15,16 @@ import Projects from '@/components/Projects';
 import Services from '@/components/Services';
 import Skills from '@/components/Skills';
 
-// High priority: Core ThreeScene (loads immediately when visible)
+// Enhanced ThreeScene with integrated fallback support
 const ThreeScene = dynamic(() => import('@/components/3D/ThreeScene'), {
   ssr: false,
   loading: () => null, // Avoid HTML elements in Canvas context
 });
 
-// High priority: Atmospheric effects (loads first for immediate ambiance)
-const LazyFloatingCandles = createLazy3DComponent(
-  () => import('@/components/3D/FloatingCandles'),
-  {
-    loadPriority: 'high',
-    loadingText: 'Lighting the magical candles...',
-    threshold: 0.2,
-    rootMargin: '200px', // Load early for better experience
-  }
-);
-
-// Medium priority: Interactive portraits (loads after candles)
-const LazyMovingPortraits = createLazy3DComponent(
-  () => import('@/components/3D/MovingPortraits'),
-  {
-    loadPriority: 'medium',
-    loadingText: 'Awakening the portraits...',
-    threshold: 0.1,
-    rootMargin: '150px',
-  }
-);
-
-// Low priority: Complex Golden Snitch (loads last)
-const LazyGoldenSnitch = createLazy3DComponent(
-  () => import('@/components/3D/GoldenSnitch'),
-  {
-    loadPriority: 'low',
-    loadingText: 'Releasing the Golden Snitch...',
-    threshold: 0.1,
-    rootMargin: '100px',
-    delayMs: 100, // Reduced delay for smoother experience
-  }
-);
-
 export default function Home() {
   return (
     <div className='relative'>
-      {/* 3D Scene Background */}
+      {/* 3D Scene Background - Properly Architected */}
       <ThreeScene
         config={{
           enableShadows: true,
@@ -64,18 +34,17 @@ export default function Home() {
         }}
         enablePerformanceMonitor={process.env.NODE_ENV === 'development'}
       >
-        {/* FloatingCandles now uses automatic LOD configuration */}
-        <LazyFloatingCandles
+        {/* Lazy-loaded 3D Components - Now properly separated from HTML */}
+        <FloatingCandlesLazy
+          count={6}
           spread={6}
-          candleScale={0.8}
-          lightIntensity={0.3}
         />
 
-        {/* MovingPortraits now uses automatic LOD configuration */}
-        <LazyMovingPortraits />
+        <MovingPortraitsLazy
+          count={4}
+        />
 
-        {/* GoldenSnitch now uses automatic LOD configuration */}
-        <LazyGoldenSnitch
+        <GoldenSnitchLazy
           bounds={{
             x: [-5, 5],
             y: [-1, 5],
@@ -86,25 +55,13 @@ export default function Home() {
         />
       </ThreeScene>
 
-      {/* Navigation */}
+      {/* HTML Content - Outside Canvas */}
       <Navigation />
-
-      {/* Hero Section */}
       <Hero />
-
-      {/* About Section */}
       <About />
-
-      {/* Skills Section */}
       <Skills />
-
-      {/* Projects Section */}
       <Projects />
-
-      {/* Services Section */}
       <Services />
-
-      {/* Contact Section */}
       <Contact />
     </div>
   );

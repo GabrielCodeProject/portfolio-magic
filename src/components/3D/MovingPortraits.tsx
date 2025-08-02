@@ -6,6 +6,7 @@ import * as THREE from 'three';
 
 import { useTheme } from '@/hooks/useTheme';
 import { useLODConfig, shouldRenderComponent, useDevicePerformance } from '@/hooks/useDevicePerformance';
+import { useFrustumCulling } from '@/hooks/useFrustumCulling';
 
 // Individual portrait properties
 interface PortraitProps {
@@ -51,6 +52,16 @@ function Portrait({
   // Portrait-specific animation offset
   const animationOffset = portraitId * 0.7;
 
+  // Add frustum culling
+  const cullingConfig = useMemo(() => ({
+    maxRenderDistance: 20,
+    fadeStartDistance: 15,
+    enableFrustumCulling: true,
+    enableDistanceCulling: true,
+  }), []);
+
+  const cullingResult = useFrustumCulling(position, cullingConfig);
+
   // LOD-based geometry complexity - dynamically calculated
   const frameSegments = Math.max(4, Math.floor(16 * geometryComplexity));
   const canvasSegments = Math.max(4, Math.floor(12 * geometryComplexity));
@@ -59,11 +70,15 @@ function Portrait({
   // Animation and interaction
   useFrame((state) => {
     if (!portraitRef.current || !eyesRef.current || !contentRef.current) return;
+    
+    // Skip expensive calculations if not visible
+    if (!cullingResult.isVisible) return;
 
     const time = state.clock.getElapsedTime();
+    const animationIntensity = cullingResult.lodLevel; // Reduce animation intensity with distance
 
-    // Interactive eye tracking (only if interactivity is enabled)
-    if (interactivity && eyesRef.current) {
+    // Interactive eye tracking (only if visible and interactivity is enabled)
+    if (interactivity && eyesRef.current && cullingResult.lodLevel > 0.3) {
       // Convert mouse position to 3D world coordinates
       const mouse3D = new THREE.Vector3(
         (mousePosition.x * 2 - 1) * (size.width / size.height) * 5,
@@ -81,7 +96,7 @@ function Portrait({
       const lookAtY = Math.max(-maxLookDistance, Math.min(maxLookDistance, direction.y * 0.5));
 
       // Smooth interpolation for natural movement (reduced fidelity for lower complexity)
-      const lerpFactor = 0.05 * animationFidelity;
+      const lerpFactor = 0.05 * animationFidelity * animationIntensity;
       eyesRef.current.position.x = THREE.MathUtils.lerp(
         eyesRef.current.position.x,
         lookAtX,
@@ -94,23 +109,26 @@ function Portrait({
       );
     }
 
-    // Idle animations (scaled by animation fidelity)
-    const idleFloat = Math.sin(time * 0.5 + animationOffset) * 0.01 * animationFidelity;
-    const idleTilt = Math.cos(time * 0.3 + animationOffset) * 0.005 * animationFidelity;
+    // Reduce animation fidelity based on distance
+    const scaledAnimationFidelity = animationFidelity * cullingResult.lodLevel;
+    
+    // Idle animations (scaled by animation fidelity and distance)
+    const idleFloat = Math.sin(time * 0.5 + animationOffset) * 0.01 * scaledAnimationFidelity;
+    const idleTilt = Math.cos(time * 0.3 + animationOffset) * 0.005 * scaledAnimationFidelity;
     
     portraitRef.current.position.y = position[1] + idleFloat;
     portraitRef.current.rotation.z = rotation[2] + idleTilt;
 
     // Scroll-based effects (only if interactivity is enabled)
     if (interactivity) {
-      const scrollInfluence = scrollOffset * 0.001 * animationFidelity;
+      const scrollInfluence = scrollOffset * 0.001 * scaledAnimationFidelity;
       contentRef.current.rotation.z = scrollInfluence * Math.sin(animationOffset);
     }
 
-    // Subtle pulsing effect for the magical elements (reduced for low complexity)
+    // Subtle pulsing effect for the magical elements (reduced for low complexity and distance)
     const pulseIntensity = geometryComplexity < 0.4 ? 0.05 : 0.1;
     const pulse = 0.8 + Math.sin(time * 2 + animationOffset) * pulseIntensity;
-    contentRef.current.scale.setScalar(pulse * animationFidelity + (1 - animationFidelity));
+    contentRef.current.scale.setScalar(pulse * scaledAnimationFidelity + (1 - scaledAnimationFidelity));
   });
 
   // Validate props after all hooks have been called
@@ -119,8 +137,19 @@ function Portrait({
     return null;
   }
 
+  // Return null if completely invisible
+  if (!cullingResult.isVisible) return null;
+
+  // Apply opacity based on distance
+  const opacity = cullingResult.opacity;
+
   return (
-    <group ref={portraitRef} position={position} rotation={rotation}>
+    <group 
+      ref={portraitRef} 
+      position={position} 
+      rotation={rotation}
+      visible={cullingResult.lodLevel > 0.1}
+    >
       {/* Ornate Frame */}
       <group>
         {/* Main frame border */}

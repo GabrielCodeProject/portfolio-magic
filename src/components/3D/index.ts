@@ -4,5 +4,33 @@ export { default as FloatingCandles } from './FloatingCandles';
 export { default as MovingPortraits } from './MovingPortraits';
 export { default as GoldenSnitch } from './GoldenSnitch';
 
-// Legacy lazy loading utilities
-export { default as Lazy3DWrapper, withLazy3D, createLazy3DComponent } from './Lazy3DWrapper';
+// Enhanced Lazy Loading with Fallback Support
+export { 
+  default as Lazy3DWrapper, 
+  createLazy3DComponent,
+  FloatingCandlesLazy,
+  MovingPortraitsLazy,
+  GoldenSnitchLazy,
+  LazyFloatingCandles,
+  LazyMovingPortraits,
+  LazyGoldenSnitch
+} from './Lazy3DWrapper';
+
+// Fallback System
+export {
+  FallbackProvider,
+  ComponentFallback,
+  FloatingCandlesWithFallback,
+  MovingPortraitsWithFallback,
+  GoldenSnitchWithFallback,
+  usePerformanceMonitoring,
+  useFallback
+} from './FallbackHandler';
+
+// 2D Fallback Components
+export {
+  FloatingCandlesFallback,
+  MovingPortraitsFallback,
+  GoldenSnitchFallback,
+  FallbackNotification
+} from '../ui/MagicalFallbacks';

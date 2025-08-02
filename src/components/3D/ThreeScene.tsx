@@ -8,6 +8,7 @@ import * as THREE from 'three';
 // extend(THREE) is no longer needed and can cause TypeScript issues
 
 import { LoadingSpinner } from '@/components/ui';
+import { FallbackProvider } from './FallbackHandler';
 
 // Scene configuration interface
 interface SceneConfig {
@@ -130,6 +131,14 @@ export default function ThreeScene({
   const prefersReducedMotion = useReducedMotion();
   const sceneConfig = { ...defaultConfig, ...config };
 
+  // Optimized camera configuration for better culling
+  const optimizedCameraConfig = {
+    position: sceneConfig.cameraPosition,
+    fov: sceneConfig.cameraFov,
+    near: 0.1, // Tighter near plane
+    far: 30,   // Optimized far plane for our scene bounds
+  };
+
   // Show loading state while checking WebGL support
   if (webGLSupported === null) {
     return (
@@ -142,47 +151,51 @@ export default function ThreeScene({
   // Show fallback if WebGL is not supported
   if (!webGLSupported) {
     return (
-      fallbackComponent || (
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-theme-primary/5" />
-        </div>
-      )
+      <FallbackProvider>
+        {fallbackComponent || (
+          <div className="fixed inset-0 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/5 to-theme-primary/5" />
+          </div>
+        )}
+      </FallbackProvider>
     );
   }
 
   // Show static fallback if user prefers reduced motion
   if (prefersReducedMotion) {
     return (
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/10 to-theme-primary/10">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-theme-accent rounded-full animate-pulse" />
-            <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-theme-primary rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
-            <div className="absolute top-1/2 left-3/4 w-1.5 h-1.5 bg-theme-accent rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+      <FallbackProvider>
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-br from-theme-accent/10 to-theme-primary/10">
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-theme-accent rounded-full animate-pulse" />
+              <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-theme-primary rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+              <div className="absolute top-1/2 left-3/4 w-1.5 h-1.5 bg-theme-accent rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+            </div>
           </div>
         </div>
-      </div>
+      </FallbackProvider>
     );
   }
 
   return (
-    <div className={`fixed inset-0 pointer-events-none ${className}`}>
-      <Canvas
+    <FallbackProvider>
+      <div className={`fixed inset-0 pointer-events-none ${className}`}>
+        <Canvas
         shadows={sceneConfig.enableShadows}
-        camera={{
-          position: sceneConfig.cameraPosition,
-          fov: sceneConfig.cameraFov,
-        }}
+        camera={optimizedCameraConfig}
         gl={{
           antialias: true,
           alpha: true,
           powerPreference: 'high-performance',
+          stencil: false, // Disable stencil buffer for better performance
         }}
         onCreated={({ gl, scene, camera }) => {
-          // Enable shadow mapping
+          // Enhanced shadow mapping
           if (sceneConfig.enableShadows) {
             gl.shadowMap.enabled = true;
             gl.shadowMap.type = THREE.PCFSoftShadowMap;
+            gl.shadowMap.autoUpdate = true;
           }
 
           // Set background
@@ -193,8 +206,22 @@ export default function ThreeScene({
           // Performance optimizations
           gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
           
-          // Frustum culling is enabled by default in Three.js
-          camera.frustumCulled = true;
+          // Enhanced frustum culling
+          camera.matrixAutoUpdate = true;
+          
+          // Optimize render order
+          scene.matrixAutoUpdate = true;
+          
+          // Log performance if monitoring is enabled
+          if (enablePerformanceMonitor && process.env.NODE_ENV === 'development') {
+            console.log('🎭 3D Scene initialized with optimizations:', {
+              shadows: sceneConfig.enableShadows,
+              pixelRatio: gl.getPixelRatio(),
+              frustumCulling: camera.frustumCulled,
+              nearPlane: camera.near,
+              farPlane: camera.far,
+            });
+          }
         }}
         dpr={[1, 2]} // Responsive pixel ratio
         performance={{ min: 0.8 }} // Adaptive performance
@@ -212,8 +239,9 @@ export default function ThreeScene({
             <meshBasicMaterial color="#333" transparent opacity={0.8} />
           </mesh>
         )}
-      </Canvas>
-    </div>
+        </Canvas>
+      </div>
+    </FallbackProvider>
   );
 }
 

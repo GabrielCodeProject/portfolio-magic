@@ -5,6 +5,7 @@ import { useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 
 import { useTheme } from '@/hooks/useTheme';
+import { useFrustumCulling } from '@/hooks/useFrustumCulling';
 
 // Flight states for different behaviors
 type FlightState = 'searching' | 'darting' | 'hovering' | 'evasive';
@@ -127,6 +128,19 @@ export default function GoldenSnitch({
   const [velocity] = useState(new THREE.Vector3());
   const { theme } = useTheme();
 
+  // Add culling configuration
+  const cullingConfig = useMemo(() => ({
+    maxRenderDistance: 25,
+    fadeStartDistance: 20,
+    enableFrustumCulling: true,
+    enableDistanceCulling: true,
+  }), []);
+
+  const cullingResult = useFrustumCulling(
+    snitchRef.current?.position || [0, 2, 0],
+    cullingConfig
+  );
+
   // Theme-based colors
   const bodyColor = theme === 'slytherin' ? '#C9A961' : '#FFD700';
   const bodyEmissive = theme === 'slytherin' ? '#8B7355' : '#B8860B';
@@ -227,8 +241,17 @@ export default function GoldenSnitch({
   // Animation and movement
   useFrame((state, deltaTime) => {
     if (!snitchRef.current) return;
+    
+    // Skip complex flight calculations when not visible
+    if (!cullingResult.isVisible) return;
 
-    updateFlightState(deltaTime);
+    // Scale animation complexity based on distance
+    const complexityMultiplier = 0.7 * cullingResult.lodLevel;
+    
+    // Only update flight state when reasonably close
+    if (cullingResult.lodLevel > 0.4) {
+      updateFlightState(deltaTime);
+    }
 
     const currentPosition = snitchRef.current.position.clone();
     const targetDirection = currentTarget.clone().sub(currentPosition);
@@ -305,8 +328,14 @@ export default function GoldenSnitch({
     snitchRef.current.position.y += bobOffset;
   });
 
+  // Return null or simplified version when not visible
+  if (!cullingResult.isVisible) return null;
+
+  // Reduce trail effects based on distance
+  const shouldShowTrails = finalEnableTrailEffects && cullingResult.lodLevel > 0.5;
+
   return (
-    <group ref={snitchRef} scale={scale}>
+    <group ref={snitchRef} scale={scale} visible={cullingResult.lodLevel > 0.1}>
       {/* Golden Snitch Body */}
       <mesh castShadow receiveShadow>
         <sphereGeometry args={[0.1, 16, 16]} />
@@ -356,8 +385,8 @@ export default function GoldenSnitch({
         decay={2}
       />
 
-      {/* Wing trail particles (subtle magical effect) - only on high quality */}
-      {finalEnableTrailEffects && (
+      {/* Wing trail particles (subtle magical effect) - only when close */}
+      {shouldShowTrails && (
         <group>
           <mesh position={[-0.2, 0, -0.1]}>
             <sphereGeometry args={[0.01, 4, 4]} />

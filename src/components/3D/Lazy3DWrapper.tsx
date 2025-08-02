@@ -1,172 +1,252 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useRef } from 'react';
+import { useLODConfig, shouldRenderComponent } from '@/hooks/useDevicePerformance';
+import { useIntersectionObserver as useIntersectionObserverHook } from '@/hooks/useIntersectionObserver';
 
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor';
-import { LoadingSpinner } from '@/components/ui';
+// Types for lazy loading configuration
+type LoadPriority = 'high' | 'medium' | 'low';
+type ComponentType = 'floatingCandles' | 'movingPortraits' | 'goldenSnitch' | 'other';
 
-// Priority levels for progressive loading
-export type LoadPriority = 'high' | 'medium' | 'low';
-
-interface Lazy3DWrapperProps {
-  children?: React.ReactNode;
-  loadPriority?: LoadPriority;
-  placeholder?: React.ReactNode;
-  loadingText?: string;
-  className?: string;
-  enabled?: boolean;
-  // Intersection observer options
-  threshold?: number;
-  rootMargin?: string;
-  // Performance options
-  delayMs?: number; // Additional delay before loading
-  preload?: boolean; // Whether to preload when near viewport
+interface Lazy3DConfig {
+  loadPriority: LoadPriority;
+  componentType: ComponentType;
+  enableIntersectionObserver: boolean;
+  enableDelayedLoading: boolean;
+  errorBoundary?: boolean;
 }
 
-/**
- * Wrapper component for lazy loading 3D elements based on viewport visibility
- * Provides progressive loading with different priority levels and intersection-based loading
- */
-export default function Lazy3DWrapper({
-  children,
-  loadPriority = 'medium',
-  placeholder,
-  loadingText = 'Loading 3D elements...',
-  className = '',
-  enabled = true,
-  threshold = 0.1,
-  rootMargin = '100px', // Start loading before element enters viewport
-  delayMs = 0,
-  preload = false,
-}: Lazy3DWrapperProps) {
-  // State management for loading phases
-  const [shouldLoad, setShouldLoad] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  
-  // Performance monitoring for development
-  const { startMeasurement, endMeasurement } = usePerformanceMonitor({
-    componentName: loadingText || `${loadPriority}-priority-3d-component`,
-    priority: loadPriority,
-    enabled: process.env.NODE_ENV === 'development',
-  });
-  
-  // Handle mounting for SSR compatibility
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+interface Lazy3DWrapperProps {
+  children: React.ReactNode;
+  config: Lazy3DConfig;
+}
 
-  // Priority-based loading with optimized timing for better UX
-  useEffect(() => {
-    if (!enabled || !isMounted) return;
+// Default configuration
+const defaultConfig: Lazy3DConfig = {
+  loadPriority: 'medium',
+  componentType: 'other',
+  enableIntersectionObserver: true,
+  enableDelayedLoading: true,
+  errorBoundary: true,
+};
 
-    const priorityDelays = {
-      high: 50,    // Load almost immediately for critical elements
-      medium: 150, // Small delay for smoother loading sequence
-      low: 400,    // Longer delay for less critical elements
-    };
-
-    const totalDelay = priorityDelays[loadPriority] + delayMs;
-    
-    // Start loading process
-    setIsLoading(true);
-    startMeasurement();
-    
-    const timer = setTimeout(() => {
-      setShouldLoad(true);
-      // Keep loading state for a smooth transition
-      setTimeout(() => {
-        setIsLoading(false);
-        endMeasurement();
-      }, 200);
-    }, totalDelay);
-    
-    return () => {
-      clearTimeout(timer);
-      setIsLoading(false);
-    };
-  }, [loadPriority, delayMs, enabled, isMounted, startMeasurement, endMeasurement]);
-
-  if (!enabled) {
-    return <group>{children}</group>;
-  }
-
-  // Don't render anything during SSR to prevent hydration mismatches
-  if (!isMounted) {
-    return <group />;
-  }
-
-  // Show loading placeholder while loading
-  if (isLoading && !shouldLoad) {
-    return (
-      <group>
-        {/* Minimal 3D loading indicator - a simple pulsing sphere */}
-        <mesh position={[0, 0, 0]}>
-          <sphereGeometry args={[0.1, 8, 8]} />
-          <meshBasicMaterial 
-            color="#8B5CF6" 
-            transparent 
-            opacity={0.6}
-          />
-        </mesh>
-      </group>
-    );
-  }
-
+// 3D-native loading indicator using Three.js objects (no HTML)
+function ThreeDLoadingIndicator({ opacity = 0.6 }: { opacity?: number }) {
   return (
     <group>
-      {shouldLoad ? (
-        <Suspense 
-          fallback={
-            <group>
-              {/* Loading placeholder visible during component loading */}
-              <mesh position={[0, 0, 0]}>
-                <sphereGeometry args={[0.05, 6, 6]} />
-                <meshBasicMaterial 
-                  color="#10B981" 
-                  transparent 
-                  opacity={0.4}
-                />
-              </mesh>
-            </group>
-          }
-        >
-          {children}
-        </Suspense>
-      ) : null}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.05, 8, 8]} />
+        <meshBasicMaterial 
+          color="#8B5CF6" 
+          transparent 
+          opacity={opacity}
+        />
+      </mesh>
+      <mesh position={[0.2, 0, 0]}>
+        <sphereGeometry args={[0.03, 6, 6]} />
+        <meshBasicMaterial 
+          color="#10B981" 
+          transparent 
+          opacity={opacity * 0.8}
+        />
+      </mesh>
+      <mesh position={[-0.2, 0, 0]}>
+        <sphereGeometry args={[0.03, 6, 6]} />
+        <meshBasicMaterial 
+          color="#F59E0B" 
+          transparent 
+          opacity={opacity * 0.8}
+        />
+      </mesh>
     </group>
   );
 }
 
-// Higher-order component for creating lazy-loaded 3D components
-export function withLazy3D(
-  Component: React.ComponentType<any>,
-  options: Omit<Lazy3DWrapperProps, 'children'> = {}
-) {
-  const displayName = Component.displayName || Component.name || 'Component';
+// Error Boundary Component that returns 3D-compatible content
+class Lazy3DErrorBoundary extends React.Component<
+  { 
+    children: React.ReactNode; 
+    componentType: ComponentType;
+  },
+  { hasError: boolean }
+> {
+  constructor(props: { 
+    children: React.ReactNode; 
+    componentType: ComponentType;
+  }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.warn(`3D Component Error (${this.props.componentType}):`, error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // Return 3D-native fallback (not HTML)
+      return (
+        <group>
+          <mesh position={[0, 0, 0]}>
+            <planeGeometry args={[2, 1]} />
+            <meshBasicMaterial 
+              color="#8B5CF6" 
+              transparent 
+              opacity={0.3}
+            />
+          </mesh>
+          <mesh position={[0, 0, 0.01]}>
+            <sphereGeometry args={[0.1, 8, 8]} />
+            <meshBasicMaterial 
+              color="#F59E0B" 
+              transparent 
+              opacity={0.6}
+            />
+          </mesh>
+        </group>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Loading delay hook with performance optimization
+function useDelayedLoading(delay: number, enabled: boolean): boolean {
+  const [isReady, setIsReady] = useState(!enabled);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    // Use requestIdleCallback for better performance if available
+    const scheduleLoad = () => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => {
+          setTimeout(() => setIsReady(true), delay);
+        });
+      } else {
+        setTimeout(() => setIsReady(true), delay);
+      }
+    };
+
+    scheduleLoad();
+  }, [delay, enabled]);
+
+  return isReady;
+}
+
+// Main Lazy3D Wrapper Component - ONLY returns 3D content (no HTML)
+export default function Lazy3DWrapper({
+  children,
+  config,
+}: Lazy3DWrapperProps) {
+  const finalConfig = { ...defaultConfig, ...config };
+  const lodConfig = useLODConfig();
   
-  const LazyComponent = (props: any) => (
-    <Lazy3DWrapper {...options}>
-      <Component {...props} />
-    </Lazy3DWrapper>
+  // Check if component should render based on LOD
+  const shouldRender = shouldRenderComponent(finalConfig.componentType, lodConfig);
+  
+  // Delayed loading based on priority with performance considerations
+  const loadDelay = {
+    high: 0,
+    medium: 300,
+    low: 800,
+  }[finalConfig.loadPriority];
+  
+  const isDelayReady = useDelayedLoading(loadDelay, finalConfig.enableDelayedLoading);
+  
+  // Determine if we should load the component
+  const shouldLoad = shouldRender && isDelayReady;
+
+  // Performance logging
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && shouldLoad) {
+      console.log(`🎭 Loading 3D Component: ${finalConfig.componentType}`, {
+        priority: finalConfig.loadPriority,
+        lodLevel: lodConfig.level,
+        delayed: isDelayReady,
+      });
+    }
+  }, [shouldLoad, finalConfig, lodConfig, isDelayReady]);
+
+  // Don't render anything if LOD says no
+  if (!shouldRender) {
+    return null;
+  }
+
+  // Show 3D loading indicator while not ready
+  if (!shouldLoad) {
+    return <ThreeDLoadingIndicator opacity={0.4} />;
+  }
+
+  // Wrap with error boundary if enabled
+  const content = (
+    <Suspense fallback={<ThreeDLoadingIndicator opacity={0.6} />}>
+      {children}
+    </Suspense>
   );
 
-  LazyComponent.displayName = `withLazy3D(${displayName})`;
+  if (finalConfig.errorBoundary) {
+    return (
+      <Lazy3DErrorBoundary componentType={finalConfig.componentType}>
+        {content}
+      </Lazy3DErrorBoundary>
+    );
+  }
+
+  return content;
+}
+
+// Utility function to create lazy 3D components with proper R3F architecture
+export function createLazy3DComponent<T extends Record<string, any>>(
+  importFn: () => Promise<{ default: React.ComponentType<T> }>,
+  config: Partial<Lazy3DConfig> = {}
+): React.ComponentType<T> {
+  const LazyComponent = lazy(importFn);
   
-  return LazyComponent;
+  return function Lazy3DComponentWrapper(props: T) {
+    return (
+      <Lazy3DWrapper config={{ ...defaultConfig, ...config }}>
+        <LazyComponent {...props} />
+      </Lazy3DWrapper>
+    );
+  };
 }
 
-// Utility function to create dynamically imported lazy 3D components
-export function createLazy3DComponent(
-  importFn: () => Promise<{ default: React.ComponentType<any> }>,
-  wrapperOptions: Omit<Lazy3DWrapperProps, 'children'> = {}
-) {
-  const DynamicComponent = dynamic(importFn, {
-    ssr: false,
-    loading: () => null, // Avoid HTML elements in Canvas context
-  });
+// Pre-configured lazy loaders with proper 3D architecture
+export const FloatingCandlesLazy = createLazy3DComponent(
+  () => import('./FloatingCandles'),
+  {
+    loadPriority: 'medium',
+    componentType: 'floatingCandles',
+    enableIntersectionObserver: false, // Disabled for Canvas components
+    enableDelayedLoading: true,
+    errorBoundary: true,
+  }
+);
 
-  return withLazy3D(DynamicComponent, wrapperOptions);
-}
+export const MovingPortraitsLazy = createLazy3DComponent(
+  () => import('./MovingPortraits'),
+  {
+    loadPriority: 'low',
+    componentType: 'movingPortraits',
+    enableIntersectionObserver: false, // Disabled for Canvas components
+    enableDelayedLoading: true,
+    errorBoundary: true,
+  }
+);
+
+export const GoldenSnitchLazy = createLazy3DComponent(
+  () => import('./GoldenSnitch'),
+  {
+    loadPriority: 'high',
+    componentType: 'goldenSnitch',
+    enableIntersectionObserver: false, // Disabled for Canvas components
+    enableDelayedLoading: false, // Load immediately for better UX
+    errorBoundary: true,
+  }
+);
